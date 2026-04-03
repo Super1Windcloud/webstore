@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body class="auth-shell">
+<main class="auth-page">
+  <section class="auth-hero">
+    <p class="eyebrow">Open-source web app store</p>
+    <h1>在一个控制台里管理你的自托管应用。</h1>
+    <p>默认暗色界面，账户注册登录，AppStore 浏览与安装，以及个人应用控制面板。</p>
+  </section>
+  <section class="auth-card">
+    <h2>登录 WebStore</h2>
+    <p class="muted">使用用户名和密码进入控制面板。</p>
+    <div class="alert error" th:if="${authError}" th:text="${authError}"></div>
+    <form th:action="@{/login}" th:object="${loginForm}" method="post" class="form-stack">
+      <label>
+        <span>用户名</span>
+        <input type="text" th:field="*{username}" placeholder="superwindcloud">
+        <small th:errors="*{username}"></small>
+      </label>
+      <label>
+        <span>密码</span>
+        <input type="password" th:field="*{password}" placeholder="••••••••">
+        <small th:errors="*{password}"></small>
+      </label>
+      <button class="primary-button" type="submit">登录</button>
+    </form>
+    <p class="auth-switch">还没有账号？<a th:href="@{/register}">立即注册</a></p>
+  </section>
+</main>
+</body>
+</html>

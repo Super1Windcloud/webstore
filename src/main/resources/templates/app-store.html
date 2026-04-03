@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(${activeNav}, ${username})}"></header>
+<main class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">AppStore</p>
+      <h1>浏览并安装新的应用</h1>
+      <p>这一版提供类似 self-hosted app marketplace 的基础体验，安装后会进入你的个人应用列表。</p>
+    </div>
+  </section>
+
+  <section class="store-grid">
+    <article class="store-card" th:each="app : ${apps}">
+      <div class="store-card-top">
+        <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">AP</div>
+        <span class="category-chip" th:text="${app.category}">Category</span>
+      </div>
+      <div class="store-card-body">
+        <h2 th:text="${app.name}">App</h2>
+        <p th:text="${app.description}">Description</p>
+      </div>
+      <div class="store-card-bottom">
+        <span class="status-pill" th:if="${app.installed}" th:text="${app.status}">RUNNING</span>
+        <form th:if="${!app.installed}" th:action="@{/app-store/{slug}/install(slug=${app.slug})}" method="post">
+          <button class="primary-button" type="submit">安装</button>
+        </form>
+        <a class="secondary-button link-button" th:if="${app.installed}" th:href="@{/my-apps}">去管理</a>
+      </div>
+    </article>
+  </section>
+</main>
+</body>
+</html>

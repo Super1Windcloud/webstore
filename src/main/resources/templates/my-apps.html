@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(${activeNav}, ${username})}"></header>
+<main class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">我的App</p>
+      <h1>管理你已经安装的服务</h1>
+      <p>当前版本支持安装、启动、停止和卸载的基础操作流。</p>
+    </div>
+  </section>
+
+  <section class="panel">
+    <div class="list-stack" th:if="${!#lists.isEmpty(apps)}">
+      <article class="app-row" th:each="app : ${apps}">
+        <div class="app-row-main">
+          <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">AP</div>
+          <div>
+            <div class="app-row-title">
+              <strong th:text="${app.name}">App</strong>
+              <span class="category-chip" th:text="${app.category}">Category</span>
+            </div>
+            <p th:text="${app.description}">Description</p>
+            <small th:text="'安装时间：' + ${#temporals.format(app.installedAt, 'yyyy-MM-dd HH:mm')}">安装时间</small>
+          </div>
+        </div>
+        <div class="app-row-actions">
+          <span class="status-pill" th:text="${app.status}">RUNNING</span>
+          <form th:if="${app.status.name() == 'RUNNING'}" th:action="@{/my-apps/{slug}/stop(slug=${app.slug})}" method="post">
+            <button class="secondary-button" type="submit">停止</button>
+          </form>
+          <form th:if="${app.status.name() == 'STOPPED'}" th:action="@{/my-apps/{slug}/start(slug=${app.slug})}" method="post">
+            <button class="secondary-button" type="submit">启动</button>
+          </form>
+          <form th:action="@{/my-apps/{slug}/uninstall(slug=${app.slug})}" method="post">
+            <button class="danger-button" type="submit">卸载</button>
+          </form>
+        </div>
+      </article>
+    </div>
+    <div class="empty-state" th:if="${#lists.isEmpty(apps)}">
+      你的应用列表还是空的。去 <a th:href="@{/app-store}">AppStore</a> 安装第一个应用。
+    </div>
+  </section>
+</main>
+</body>
+</html>

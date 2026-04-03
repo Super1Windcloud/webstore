@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(${activeNav}, ${username})}"></header>
+<main class="page-shell">
+  <section class="hero-panel">
+    <div>
+      <p class="eyebrow">控制面板</p>
+      <h1>欢迎回来，<span th:text="${username}">user</span></h1>
+      <p>这里汇总你当前的已安装应用、运行状态，以及可快速安装的热门应用。</p>
+    </div>
+    <div class="hero-metrics">
+      <div class="metric-card">
+        <span>总应用</span>
+        <strong th:text="${summary.totalApps}">0</strong>
+      </div>
+      <div class="metric-card">
+        <span>已安装</span>
+        <strong th:text="${summary.installedApps}">0</strong>
+      </div>
+      <div class="metric-card">
+        <span>运行中</span>
+        <strong th:text="${summary.runningApps}">0</strong>
+      </div>
+      <div class="metric-card">
+        <span>已停止</span>
+        <strong th:text="${summary.stoppedApps}">0</strong>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>最近安装</h2>
+        <a th:href="@{/my-apps}">查看全部</a>
+      </div>
+      <div class="list-stack" th:if="${!#lists.isEmpty(recentApps)}">
+        <article class="list-item" th:each="app : ${recentApps}">
+          <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">NC</div>
+          <div>
+            <strong th:text="${app.name}">App</strong>
+            <p th:text="${app.description}">Description</p>
+          </div>
+          <span class="status-pill" th:text="${app.status}">RUNNING</span>
+        </article>
+      </div>
+      <div class="empty-state" th:if="${#lists.isEmpty(recentApps)}">
+        还没有安装任何应用，先去 AppStore 选一个开始。
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>热门应用</h2>
+        <a th:href="@{/app-store}">打开 AppStore</a>
+      </div>
+      <div class="store-grid compact">
+        <article class="store-card" th:each="app : ${storeCards}">
+          <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">AP</div>
+          <div>
+            <strong th:text="${app.name}">App</strong>
+            <p th:text="${app.description}">Description</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>

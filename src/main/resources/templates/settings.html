@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(${activeNav}, ${username})}"></header>
+<main class="page-shell">
+  <section class="page-header">
+    <div>
+      <p class="eyebrow">设置</p>
+      <h1>账户与界面配置</h1>
+      <p>当前提供基础账户信息展示、JWT 登录态，以及暗色/浅色主题切换。</p>
+    </div>
+  </section>
+
+  <section class="content-grid settings-grid">
+    <article class="panel">
+      <div class="panel-head">
+        <h2>账户信息</h2>
+      </div>
+      <div class="settings-list">
+        <div>
+          <span>用户名</span>
+          <strong th:text="${username}">user</strong>
+        </div>
+        <div>
+          <span>邮箱</span>
+          <strong th:text="${email}">mail@example.com</strong>
+        </div>
+        <div>
+          <span>注册时间</span>
+          <strong th:text="${#temporals.format(createdAt, 'yyyy-MM-dd HH:mm')}">2026-01-01 12:00</strong>
+        </div>
+        <div>
+          <span>鉴权方式</span>
+          <strong>JWT Cookie</strong>
+        </div>
+      </div>
+    </article>
+
+    <article class="panel">
+      <div class="panel-head">
+        <h2>主题</h2>
+      </div>
+      <p class="muted">默认主题为暗色。切换后会保存在浏览器本地，下次访问自动恢复。</p>
+      <button class="primary-button" type="button" data-theme-toggle>切换暗色 / 浅色</button>
+    </article>
+  </section>
+</main>
+</body>
+</html>

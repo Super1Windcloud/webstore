@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body class="auth-shell">
+<main class="auth-page">
+  <section class="auth-hero">
+    <p class="eyebrow">Create your workspace</p>
+    <h1>注册一个账号，开始构建属于你的私有 AppStore。</h1>
+    <p>注册后会自动签发 JWT 并进入控制面板，无需额外 session 配置。</p>
+  </section>
+  <section class="auth-card">
+    <h2>创建账号</h2>
+    <p class="muted">基础注册流程已经接入 JWT 鉴权。</p>
+    <div class="alert error" th:if="${registerError}" th:text="${registerError}"></div>
+    <form th:action="@{/register}" th:object="${registrationForm}" method="post" class="form-stack">
+      <label>
+        <span>用户名</span>
+        <input type="text" th:field="*{username}" placeholder="superwindcloud">
+        <small th:errors="*{username}"></small>
+      </label>
+      <label>
+        <span>邮箱</span>
+        <input type="email" th:field="*{email}" placeholder="hello@example.com">
+        <small th:errors="*{email}"></small>
+      </label>
+      <label>
+        <span>密码</span>
+        <input type="password" th:field="*{password}" placeholder="至少 6 位">
+        <small th:errors="*{password}"></small>
+      </label>
+      <button class="primary-button" type="submit">注册并进入</button>
+    </form>
+    <p class="auth-switch">已有账号？<a th:href="@{/login}">返回登录</a></p>
+  </section>
+</main>
+</body>
+</html>

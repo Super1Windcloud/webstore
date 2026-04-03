@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:fragment="head(title)">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${title} + ' | WebStore'">WebStore</title>
+  <script>
+    (() => {
+      const storedTheme = localStorage.getItem("webstore-theme");
+      const theme = storedTheme || "dark";
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/app.css}">
+  <script defer th:src="@{/js/theme.js}"></script>
+</head>
+<body>
+<header class="topbar" th:fragment="topbar(activeNav, username)">
+  <div class="brand">
+    <div class="brand-mark">WS</div>
+    <div>
+      <div class="brand-title">WebStore</div>
+      <div class="brand-subtitle">Self-hosted app marketplace</div>
+    </div>
+  </div>
+  <nav class="nav">
+    <a th:href="@{/dashboard}" th:classappend="${activeNav == 'dashboard'} ? ' active'">控制面板</a>
+    <a th:href="@{/my-apps}" th:classappend="${activeNav == 'my-apps'} ? ' active'">我的App</a>
+    <a th:href="@{/app-store}" th:classappend="${activeNav == 'app-store'} ? ' active'">AppStore</a>
+    <a th:href="@{/settings}" th:classappend="${activeNav == 'settings'} ? ' active'">设置</a>
+  </nav>
+  <div class="topbar-actions">
+    <button class="theme-toggle" type="button" data-theme-toggle>切换主题</button>
+    <div class="user-chip" th:text="${username}">user</div>
+    <form th:action="@{/logout}" method="post">
+      <button class="ghost-button" type="submit">退出</button>
+    </form>
+  </div>
+</header>
+</body>
+</html>
