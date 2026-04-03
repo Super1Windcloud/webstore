@@ -1,0 +1,67 @@
+services:
+  webstore:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: webstore-app
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/webstore
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATASOURCE_USERNAME: webstore
+      SPRING_DATASOURCE_PASSWORD: webstore
+      SPRING_H2_CONSOLE_ENABLED: "false"
+      WEBSTORE_SECURITY_JWT_SECRET: change-this-jwt-secret-before-production-use
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.webstore.rule: Host(`localhost`)
+      traefik.http.routers.webstore.entrypoints: web
+      traefik.http.services.webstore.loadbalancer.server.port: "8080"
+    networks:
+      - web
+      - internal
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: webstore-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: webstore
+      POSTGRES_USER: webstore
+      POSTGRES_PASSWORD: webstore
+    volumes:
+      - ./docker-data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U webstore -d webstore"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - internal
+
+  traefik:
+    image: traefik:v3.4
+    container_name: webstore-traefik
+    restart: unless-stopped
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "8081:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+    depends_on:
+      - webstore
+    networks:
+      - web
+
+networks:
+  web:
+    driver: bridge
+  internal:
+    driver: bridge

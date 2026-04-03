@@ -80,6 +80,44 @@ By default the app starts on:
 http://localhost:8080
 ```
 
+### Run with Docker Compose
+
+The repository now includes a minimal platform stack for local container startup:
+
+- `webstore` Spring Boot application
+- `postgres` for persistent platform data
+- `traefik` as the reverse proxy
+
+Start the stack:
+
+```bash
+docker compose up -d --build
+```
+
+On Windows:
+
+```powershell
+docker compose up -d --build
+```
+
+Then open:
+
+```text
+http://localhost
+```
+
+Traefik dashboard:
+
+```text
+http://localhost:8081
+```
+
+Notes:
+
+- If port `80` is already in use, change the Traefik port mapping in `docker-compose.yml`.
+- The default PostgreSQL and JWT credentials in `docker-compose.yml` are for local development only.
+- Local PostgreSQL data is stored in `./docker-data/postgres`.
+
 ## Quality Checks
 
 Run formatting checks:
