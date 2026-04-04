@@ -77,4 +77,13 @@ public class AppDefinition {
   public String getIcon() {
     return icon;
   }
+
+  public void updateCatalogMetadata(
+      String name, String category, String description, String accentColor, String icon) {
+    this.name = name;
+    this.category = category;
+    this.description = description;
+    this.accentColor = accentColor;
+    this.icon = icon;
+  }
 }

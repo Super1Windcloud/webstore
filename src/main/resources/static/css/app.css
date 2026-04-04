@@ -92,7 +92,8 @@ input {
 }
 
 .brand-mark,
-.icon-badge {
+.icon-badge,
+.store-logo-wrap {
   display: grid;
   place-items: center;
   border-radius: 16px;
@@ -304,6 +305,20 @@ small,
   height: 54px;
   background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 25%, #020617));
   flex-shrink: 0;
+}
+
+.store-logo-wrap {
+  width: 54px;
+  height: 54px;
+  padding: 8px;
+  background: linear-gradient(135deg, var(--accent), color-mix(in srgb, var(--accent) 25%, #020617));
+  flex-shrink: 0;
+}
+
+.store-logo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .store-grid {

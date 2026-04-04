@@ -85,7 +85,9 @@
       </div>
       <div class="store-grid compact">
         <article class="store-card" th:each="app : ${storeCards}">
-          <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">AP</div>
+          <div class="store-logo-wrap" th:style="'--accent:' + ${app.accentColor}">
+            <img class="store-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
+          </div>
           <div>
             <strong th:text="${app.name}">App</strong>
             <p th:text="${app.description}">Description</p>

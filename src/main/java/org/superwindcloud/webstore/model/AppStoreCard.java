@@ -9,5 +9,6 @@ public record AppStoreCard(
     String description,
     String accentColor,
     String icon,
+    String logoUrl,
     boolean installed,
     InstalledAppStatus status) {}

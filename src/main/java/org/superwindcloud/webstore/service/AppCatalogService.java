@@ -6,6 +6,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.superwindcloud.webstore.config.AppStoreProperties;
 import org.superwindcloud.webstore.domain.AppDefinition;
 import org.superwindcloud.webstore.domain.InstalledApp;
 import org.superwindcloud.webstore.domain.InstalledAppStatus;
@@ -21,39 +22,28 @@ public class AppCatalogService {
 
   private final AppDefinitionRepository appDefinitionRepository;
   private final InstalledAppRepository installedAppRepository;
+  private final AppStoreProperties appStoreProperties;
+  private final RuntipiAppStoreSyncService runtipiAppStoreSyncService;
 
   public AppCatalogService(
       AppDefinitionRepository appDefinitionRepository,
-      InstalledAppRepository installedAppRepository) {
+      InstalledAppRepository installedAppRepository,
+      AppStoreProperties appStoreProperties,
+      RuntipiAppStoreSyncService runtipiAppStoreSyncService) {
     this.appDefinitionRepository = appDefinitionRepository;
     this.installedAppRepository = installedAppRepository;
+    this.appStoreProperties = appStoreProperties;
+    this.runtipiAppStoreSyncService = runtipiAppStoreSyncService;
   }
 
   @Transactional(readOnly = true)
   public List<AppStoreCard> getStoreCards(UserAccount user) {
-    Map<Long, InstalledApp> installedByAppId =
-        installedAppRepository.findAllByUserOrderByInstalledAtDesc(user).stream()
-            .collect(
-                Collectors.toMap(
-                    installedApp -> installedApp.getAppDefinition().getId(),
-                    Function.identity(),
-                    (left, right) -> left));
+    return mapStoreCards(appDefinitionRepository.findAll(), installedAppStatusBySlug(user));
+  }
 
-    return appDefinitionRepository.findAll().stream()
-        .map(
-            app -> {
-              InstalledApp installedApp = installedByAppId.get(app.getId());
-              return new AppStoreCard(
-                  app.getSlug(),
-                  app.getName(),
-                  app.getCategory(),
-                  app.getDescription(),
-                  app.getAccentColor(),
-                  app.getIcon(),
-                  installedApp != null,
-                  installedApp != null ? installedApp.getStatus() : null);
-            })
-        .toList();
+  @Transactional(readOnly = true)
+  public List<AppStoreCard> getLiveStoreCards(UserAccount user) {
+    return runtipiAppStoreSyncService.fetchLiveStoreCards(installedAppStatusBySlug(user));
   }
 
   @Transactional(readOnly = true)
@@ -111,6 +101,44 @@ public class AppCatalogService {
             .findByUserAndAppDefinition(user, appDefinition)
             .orElseThrow(() -> new IllegalArgumentException("App is not installed"));
     installedApp.setStatus(status);
+  }
+
+  private List<AppStoreCard> mapStoreCards(
+      List<AppDefinition> appDefinitions, Map<String, InstalledAppStatus> installedStatusBySlug) {
+    return appDefinitions.stream()
+        .map(
+            app ->
+                new AppStoreCard(
+                    app.getSlug(),
+                    app.getName(),
+                    app.getCategory(),
+                    app.getDescription(),
+                    app.getAccentColor(),
+                    app.getIcon(),
+                    logoUrlFor(app.getSlug()),
+                    installedStatusBySlug.containsKey(app.getSlug()),
+                    installedStatusBySlug.get(app.getSlug())))
+        .toList();
+  }
+
+  private Map<String, InstalledAppStatus> installedAppStatusBySlug(UserAccount user) {
+    Map<Long, InstalledApp> installedByAppId =
+        installedAppRepository.findAllByUserOrderByInstalledAtDesc(user).stream()
+            .collect(
+                Collectors.toMap(
+                    installedApp -> installedApp.getAppDefinition().getId(),
+                    Function.identity(),
+                    (left, right) -> left));
+    return installedByAppId.values().stream()
+        .collect(
+            Collectors.toMap(
+                installedApp -> installedApp.getAppDefinition().getSlug(),
+                InstalledApp::getStatus,
+                (left, right) -> left));
+  }
+
+  private String logoUrlFor(String slug) {
+    return appStoreProperties.rawBaseUrl() + "/" + slug + "/metadata/logo.jpg";
   }
 
   private AppDefinition getAppDefinition(String slug) {

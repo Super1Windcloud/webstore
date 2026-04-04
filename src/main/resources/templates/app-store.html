@@ -8,14 +8,16 @@
     <div>
       <p class="eyebrow">AppStore</p>
       <h1>浏览并安装新的应用</h1>
-      <p>这一版提供类似 self-hosted app marketplace 的基础体验，安装后会进入你的个人应用列表。</p>
+      <p>应用目录会优先同步 runtipi-appstore 仓库，安装后会进入你的个人应用列表。</p>
     </div>
   </section>
 
   <section class="store-grid">
     <article class="store-card" th:each="app : ${apps}">
       <div class="store-card-top">
-        <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">AP</div>
+        <div class="store-logo-wrap" th:style="'--accent:' + ${app.accentColor}">
+          <img class="store-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
+        </div>
         <span class="category-chip" th:text="${app.category}">Category</span>
       </div>
       <div class="store-card-body">

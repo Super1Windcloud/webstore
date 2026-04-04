@@ -63,4 +63,9 @@ public class DataSeeder {
                   "UK")));
     };
   }
+
+  @Bean
+  ApplicationRunner syncRuntipiCatalog(RuntipiAppStoreSyncService runtipiAppStoreSyncService) {
+    return args -> runtipiAppStoreSyncService.syncIfStale();
+  }
 }
