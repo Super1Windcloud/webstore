@@ -12,6 +12,13 @@ RUN mvn -q -pl runtime-agent -am -DskipTests package
 FROM eclipse-temurin:17-jre
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends docker.io docker-compose \
+    && mv /usr/bin/docker /usr/bin/docker-real \
+    && printf '#!/bin/sh\nif [ "$1" = "compose" ]; then\n  shift\n  exec docker-compose "$@"\nfi\nexec /usr/bin/docker-real "$@"\n' > /usr/local/bin/docker \
+    && chmod +x /usr/local/bin/docker \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY --from=build /workspace/runtime-agent/target/runtime-agent-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 9000

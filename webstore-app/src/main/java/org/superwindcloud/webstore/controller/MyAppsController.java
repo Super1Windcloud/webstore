@@ -69,7 +69,7 @@ public class MyAppsController {
       redirectAttributes.addFlashAttribute("toastType", "success");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
-      log.warn("WebStore start failed for app '{}': {}", slug, ex.getMessage(), ex);
+      log.warn("WebStore start failed for app '{}': {}", slug, ex.getMessage());
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -90,7 +90,7 @@ public class MyAppsController {
       redirectAttributes.addFlashAttribute("toastType", "warning");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已停止", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
-      log.warn("WebStore stop failed for app '{}': {}", slug, ex.getMessage(), ex);
+      log.warn("WebStore stop failed for app '{}': {}", slug, ex.getMessage());
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -110,7 +110,7 @@ public class MyAppsController {
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已卸载", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
-      log.warn("WebStore uninstall failed for app '{}': {}", slug, ex.getMessage(), ex);
+      log.warn("WebStore uninstall failed for app '{}': {}", slug, ex.getMessage());
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -128,7 +128,7 @@ public class MyAppsController {
       redirectAttributes.addFlashAttribute("toastType", "success");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("所有应用已启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
-      log.warn("WebStore start-all failed: {}", ex.getMessage(), ex);
+      log.warn("WebStore start-all failed: {}", ex.getMessage());
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -146,7 +146,7 @@ public class MyAppsController {
       redirectAttributes.addFlashAttribute("toastType", "warning");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("所有应用已停止", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
-      log.warn("WebStore stop-all failed: {}", ex.getMessage(), ex);
+      log.warn("WebStore stop-all failed: {}", ex.getMessage());
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";

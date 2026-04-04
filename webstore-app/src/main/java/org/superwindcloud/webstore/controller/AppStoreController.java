@@ -67,7 +67,7 @@ public class AppStoreController {
       redirectAttributes.addFlashAttribute("toastType", "success");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已安装并启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
-      log.warn("WebStore install failed for app '{}': {}", slug, ex.getMessage(), ex);
+      log.warn("WebStore install failed for app '{}': {}", slug, ex.getMessage());
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/app-store";
