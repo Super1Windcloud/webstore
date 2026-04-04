@@ -1,0 +1,13 @@
+http:
+  routers:
+    webstore-local:
+      entryPoints:
+        - web
+      rule: Host(`localhost`)
+      service: webstore-local
+
+  services:
+    webstore-local:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:8080"

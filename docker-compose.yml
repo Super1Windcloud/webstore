@@ -1,5 +1,7 @@
 services:
   webstore:
+    profiles:
+      - app
     build:
       context: .
       dockerfile: Dockerfile
@@ -28,6 +30,8 @@ services:
     image: postgres:17-alpine
     container_name: webstore-postgres
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: webstore
       POSTGRES_USER: webstore
@@ -44,6 +48,8 @@ services:
       - internal
 
   traefik:
+    profiles:
+      - proxy
     image: traefik:v3.4
     container_name: webstore-traefik
     restart: unless-stopped
@@ -55,8 +61,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
-    depends_on:
-      - webstore
+      - ./traefik/dynamic:/etc/traefik/dynamic:ro
     networks:
       - web
 

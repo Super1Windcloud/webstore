@@ -88,16 +88,48 @@ The repository now includes a minimal platform stack for local container startup
 - `postgres` for persistent platform data
 - `traefik` as the reverse proxy
 
-Start the stack:
+Start only the non-Spring backend services and run `webstore` locally:
 
 ```bash
-docker compose up -d --build
+docker compose up -d postgres
+docker compose --profile proxy up -d traefik
 ```
 
 On Windows:
 
 ```powershell
-docker compose up -d --build
+docker compose up -d postgres
+docker compose --profile proxy up -d traefik
+```
+
+Then start the Spring Boot app locally with PostgreSQL from Docker:
+
+```powershell
+$env:SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/webstore"
+$env:SPRING_DATASOURCE_DRIVER_CLASS_NAME="org.postgresql.Driver"
+$env:SPRING_DATASOURCE_USERNAME="webstore"
+$env:SPRING_DATASOURCE_PASSWORD="webstore"
+$env:SPRING_H2_CONSOLE_ENABLED="false"
+$env:WEBSTORE_SECURITY_JWT_SECRET="change-this-jwt-secret-before-production-use"
+.\mvnw.cmd spring-boot:run
+```
+
+In this mode:
+
+- `postgres` runs in Docker and is exposed on `localhost:5432`
+- `traefik` runs in Docker and forwards `http://localhost` to your local Spring Boot app on port `8080`
+- `webstore` itself does not need to run in Docker
+
+Start the full containerized stack when needed:
+
+```bash
+docker compose --profile app --profile proxy up -d --build
+```
+
+On Windows:
+
+```powershell
+docker compose --profile app --profile proxy up -d --build
 ```
 
 Then open:
@@ -114,6 +146,10 @@ http://localhost:8081
 
 Notes:
 
+- `postgres` is the default infrastructure service and can be started independently.
+- `webstore` is under the `app` profile.
+- `traefik` is under the `proxy` profile.
+- The Traefik local-development route points to `http://host.docker.internal:8080`.
 - If port `80` is already in use, change the Traefik port mapping in `docker-compose.yml`.
 - The default PostgreSQL and JWT credentials in `docker-compose.yml` are for local development only.
 - Local PostgreSQL data is stored in `./docker-data/postgres`.
