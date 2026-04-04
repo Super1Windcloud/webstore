@@ -38,6 +38,17 @@ public class AppStoreController {
     return "app-store";
   }
 
+  @GetMapping("/app-store/{slug}")
+  public String appDetail(@PathVariable String slug, Authentication authentication, Model model) {
+    runtipiAppStoreSyncService.syncIfStale();
+    UserAccount user = currentUserService.requireUser(authentication);
+    model.addAttribute("pageTitle", "App 详情");
+    model.addAttribute("activeNav", "app-store");
+    model.addAttribute("username", user.getUsername());
+    model.addAttribute("app", appCatalogService.getLiveStoreDetail(user, slug));
+    return "app-detail";
+  }
+
   @PostMapping("/app-store/{slug}/install")
   public String install(@PathVariable String slug, Authentication authentication) {
     appCatalogService.installApp(currentUserService.requireUser(authentication), slug);

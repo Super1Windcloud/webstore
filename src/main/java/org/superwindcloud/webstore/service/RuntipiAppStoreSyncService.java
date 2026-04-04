@@ -29,6 +29,7 @@ import org.superwindcloud.webstore.config.AppStoreProperties;
 import org.superwindcloud.webstore.domain.AppDefinition;
 import org.superwindcloud.webstore.domain.InstalledAppStatus;
 import org.superwindcloud.webstore.model.AppStoreCard;
+import org.superwindcloud.webstore.model.AppStoreDetail;
 import org.superwindcloud.webstore.repository.AppDefinitionRepository;
 
 @Service
@@ -105,6 +106,36 @@ public class RuntipiAppStoreSyncService {
     }
   }
 
+  public AppStoreDetail fetchLiveStoreDetail(
+      String slug, Map<String, InstalledAppStatus> installedStatusBySlug) {
+    try {
+      return fetchRemoteDetail(slug, installedStatusBySlug);
+    } catch (Exception ex) {
+      log.warn("Falling back to cached app detail for {}: {}", slug, ex.getMessage());
+      AppDefinition appDefinition =
+          appDefinitionRepository
+              .findBySlug(slug)
+              .orElseThrow(() -> new IllegalArgumentException("App not found"));
+      return new AppStoreDetail(
+          appDefinition.getSlug(),
+          appDefinition.getName(),
+          appDefinition.getCategory(),
+          appDefinition.getDescription(),
+          appDefinition.getDescription(),
+          appDefinition.getAccentColor(),
+          appDefinition.getIcon(),
+          logoUrlFor(appDefinition.getSlug()),
+          installedStatusBySlug.containsKey(appDefinition.getSlug()),
+          installedStatusBySlug.get(appDefinition.getSlug()),
+          "Unknown",
+          "Unknown",
+          null,
+          "Unknown",
+          "Unknown",
+          List.of());
+    }
+  }
+
   @Transactional
   public void syncCatalog() throws IOException, InterruptedException {
     HttpRequest request =
@@ -132,21 +163,7 @@ public class RuntipiAppStoreSyncService {
 
   private List<AppStoreCard> fetchRemoteCards(Map<String, InstalledAppStatus> installedStatusBySlug)
       throws IOException, InterruptedException {
-    HttpRequest request =
-        HttpRequest.newBuilder(URI.create(appStoreProperties.zipUrl()))
-            .timeout(Duration.ofSeconds(30))
-            .header("User-Agent", "webstore-dev")
-            .GET()
-            .build();
-
-    HttpResponse<InputStream> response =
-        httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
-
-    if (response.statusCode() >= 400) {
-      throw new IOException("Unexpected HTTP status: " + response.statusCode());
-    }
-
-    List<AppDefinitionPayload> apps = parseApps(response.body());
+    List<AppDefinitionPayload> apps = parseApps(downloadZipStream());
     return apps.stream()
         .map(
             app ->
@@ -161,6 +178,51 @@ public class RuntipiAppStoreSyncService {
                     installedStatusBySlug.containsKey(app.slug()),
                     installedStatusBySlug.get(app.slug())))
         .toList();
+  }
+
+  private AppStoreDetail fetchRemoteDetail(
+      String slug, Map<String, InstalledAppStatus> installedStatusBySlug)
+      throws IOException, InterruptedException {
+    return parseApps(downloadZipStream()).stream()
+        .filter(app -> app.slug().equals(slug))
+        .findFirst()
+        .map(
+            app ->
+                new AppStoreDetail(
+                    app.slug(),
+                    app.name(),
+                    app.category(),
+                    app.description(),
+                    app.longDescription(),
+                    app.accentColor(),
+                    app.icon(),
+                    logoUrlFor(app.slug()),
+                    installedStatusBySlug.containsKey(app.slug()),
+                    installedStatusBySlug.get(app.slug()),
+                    app.version(),
+                    app.author(),
+                    app.sourceUrl(),
+                    app.port(),
+                    app.tipiVersion(),
+                    app.architectures()))
+        .orElseThrow(() -> new IllegalArgumentException("App not found"));
+  }
+
+  private InputStream downloadZipStream() throws IOException, InterruptedException {
+    HttpRequest request =
+        HttpRequest.newBuilder(URI.create(appStoreProperties.zipUrl()))
+            .timeout(Duration.ofSeconds(30))
+            .header("User-Agent", "webstore-dev")
+            .GET()
+            .build();
+
+    HttpResponse<InputStream> response =
+        httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+
+    if (response.statusCode() >= 400) {
+      throw new IOException("Unexpected HTTP status: " + response.statusCode());
+    }
+    return response.body();
   }
 
   private List<AppDefinitionPayload> parseApps(InputStream responseBody) throws IOException {
@@ -197,6 +259,23 @@ public class RuntipiAppStoreSyncService {
                     stringValue(config.get("description")).orElse(null),
                     FALLBACK_DESCRIPTION),
                 255);
+        String longDescription =
+            firstNonBlank(
+                stringValue(config.get("description")).orElse(null),
+                stringValue(config.get("short_desc")).orElse(null),
+                FALLBACK_DESCRIPTION);
+        String version = stringValue(config.get("version")).orElse("Unknown");
+        String author = stringValue(config.get("author")).orElse("Unknown");
+        String sourceUrl = stringValue(config.get("source")).orElse(null);
+        String port = config.containsKey("port") ? String.valueOf(config.get("port")) : "Unknown";
+        String tipiVersion =
+            firstNonBlank(
+                stringValue(config.get("min_tipi_version")).orElse(null),
+                config.containsKey("tipi_version")
+                    ? String.valueOf(config.get("tipi_version"))
+                    : null,
+                "Unknown");
+        List<String> architectures = extractArchitectures(config.get("supported_architectures"));
 
         apps.add(
             new AppDefinitionPayload(
@@ -204,8 +283,15 @@ public class RuntipiAppStoreSyncService {
                 truncate(name, 120),
                 category,
                 description,
+                longDescription,
                 colorFor(slug),
-                initialsFor(name)));
+                initialsFor(name),
+                version,
+                author,
+                sourceUrl,
+                port,
+                tipiVersion,
+                architectures));
       }
     }
 
@@ -217,6 +303,18 @@ public class RuntipiAppStoreSyncService {
       return Optional.of(string);
     }
     return Optional.empty();
+  }
+
+  private List<String> extractArchitectures(Object value) {
+    if (!(value instanceof List<?> values)) {
+      return List.of();
+    }
+
+    List<String> architectures = new ArrayList<>();
+    for (Object entry : values) {
+      stringValue(entry).ifPresent(architectures::add);
+    }
+    return architectures;
   }
 
   private void upsert(AppDefinitionPayload payload) {
@@ -305,6 +403,13 @@ public class RuntipiAppStoreSyncService {
       String name,
       String category,
       String description,
+      String longDescription,
       String accentColor,
-      String icon) {}
+      String icon,
+      String version,
+      String author,
+      String sourceUrl,
+      String port,
+      String tipiVersion,
+      List<String> architectures) {}
 }

@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const searchInput = document.querySelector("[data-app-store-search]");
-  const appCards = Array.from(document.querySelectorAll("[data-search-text]"));
+  const appCards = Array.from(document.querySelectorAll("[data-app-store-card]"));
   const emptyState = document.querySelector("[data-app-store-empty]");
   const visibleCount = document.querySelector("[data-app-store-visible-count]");
 
@@ -22,7 +22,13 @@ document.addEventListener("DOMContentLoaded", () => {
       let count = 0;
 
       appCards.forEach((card) => {
-        const searchText = card.getAttribute("data-search-text") || "";
+        const searchText = [
+          card.querySelector("[data-app-store-name]")?.textContent || "",
+          card.querySelector("[data-app-store-category]")?.textContent || "",
+          card.querySelector("[data-app-store-description]")?.textContent || "",
+        ]
+          .join(" ")
+          .toLowerCase();
         const isVisible = query === "" || searchText.includes(query);
         card.hidden = !isVisible;
         if (isVisible) {

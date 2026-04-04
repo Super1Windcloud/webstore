@@ -12,6 +12,7 @@ import org.superwindcloud.webstore.domain.InstalledApp;
 import org.superwindcloud.webstore.domain.InstalledAppStatus;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.model.AppStoreCard;
+import org.superwindcloud.webstore.model.AppStoreDetail;
 import org.superwindcloud.webstore.model.DashboardSummary;
 import org.superwindcloud.webstore.model.InstalledAppView;
 import org.superwindcloud.webstore.repository.AppDefinitionRepository;
@@ -44,6 +45,11 @@ public class AppCatalogService {
   @Transactional(readOnly = true)
   public List<AppStoreCard> getLiveStoreCards(UserAccount user) {
     return runtipiAppStoreSyncService.fetchLiveStoreCards(installedAppStatusBySlug(user));
+  }
+
+  @Transactional(readOnly = true)
+  public AppStoreDetail getLiveStoreDetail(UserAccount user, String slug) {
+    return runtipiAppStoreSyncService.fetchLiveStoreDetail(slug, installedAppStatusBySlug(user));
   }
 
   @Transactional(readOnly = true)

@@ -24,20 +24,19 @@
   </section>
 
   <section class="store-grid" data-app-store-grid>
-    <article
-        class="store-card"
-        th:each="app : ${apps}"
-        th:attr="data-search-text=${#strings.toLowerCase(app.name + ' ' + app.category + ' ' + app.description)}">
-      <div class="store-card-top">
-        <div class="store-logo-wrap" th:style="'--accent:' + ${app.accentColor}">
-          <img class="store-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
+    <article class="store-card" th:each="app : ${apps}" data-app-store-card>
+      <a class="store-card-link" th:href="@{/app-store/{slug}(slug=${app.slug})}">
+        <div class="store-card-top">
+          <div class="store-logo-wrap" th:style="'--accent:' + ${app.accentColor}">
+            <img class="store-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
+          </div>
+          <span class="category-chip" th:text="${app.category}" data-app-store-category>Category</span>
         </div>
-        <span class="category-chip" th:text="${app.category}">Category</span>
-      </div>
-      <div class="store-card-body">
-        <h2 th:text="${app.name}">App</h2>
-        <p th:text="${app.description}">Description</p>
-      </div>
+        <div class="store-card-body">
+          <h2 th:text="${app.name}" data-app-store-name>App</h2>
+          <p th:text="${app.description}" data-app-store-description>Description</p>
+        </div>
+      </a>
       <div class="store-card-bottom">
         <span class="status-pill" th:if="${app.installed}" th:text="${app.status}">RUNNING</span>
         <form th:if="${!app.installed}" th:action="@{/app-store/{slug}/install(slug=${app.slug})}" method="post">

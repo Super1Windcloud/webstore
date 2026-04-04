@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: topbar(${activeNav}, ${username})}"></header>
+<main class="page-shell">
+  <section class="hero-panel">
+    <div>
+      <p class="eyebrow">App 详情</p>
+      <h1 th:text="${app.name}">App</h1>
+      <p th:text="${app.longDescription}">Description</p>
+      <div class="store-card-bottom">
+        <span class="category-chip" th:text="${app.category}">Category</span>
+        <span class="status-pill" th:if="${app.installed}" th:text="${app.status}">RUNNING</span>
+        <form th:if="${!app.installed}" th:action="@{/app-store/{slug}/install(slug=${app.slug})}" method="post">
+          <button class="primary-button" type="submit">安装</button>
+        </form>
+        <a class="secondary-button link-button" th:if="${app.installed}" th:href="@{/my-apps}">去管理</a>
+      </div>
+    </div>
+    <div class="detail-logo-panel" th:style="'--accent:' + ${app.accentColor}">
+      <img class="detail-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>基本信息</h2>
+      </div>
+      <div class="settings-list">
+        <div><span>版本</span><strong th:text="${app.version}">Unknown</strong></div>
+        <div><span>作者</span><strong th:text="${app.author}">Unknown</strong></div>
+        <div><span>默认端口</span><strong th:text="${app.port}">Unknown</strong></div>
+        <div><span>Tipi 版本</span><strong th:text="${app.tipiVersion}">Unknown</strong></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>兼容性</h2>
+      </div>
+      <div class="settings-list">
+        <div>
+          <span>支持架构</span>
+          <strong th:text="${#lists.isEmpty(app.architectures) ? 'Unknown' : #strings.listJoin(app.architectures, ', ')}">Unknown</strong>
+        </div>
+        <div>
+          <span>源码地址</span>
+          <a th:if="${app.sourceUrl != null}" th:href="${app.sourceUrl}" target="_blank" rel="noreferrer">打开仓库</a>
+          <strong th:if="${app.sourceUrl == null}">Unknown</strong>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</body>
+</html>
