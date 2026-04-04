@@ -2,6 +2,7 @@ FROM maven:3.9.11-eclipse-temurin-17 AS build
 WORKDIR /workspace
 
 COPY pom.xml /workspace/pom.xml
+COPY webstore-app/pom.xml /workspace/webstore-app/pom.xml
 COPY runtime-agent/pom.xml /workspace/runtime-agent/pom.xml
 RUN mvn -q -pl runtime-agent -am -DskipTests dependency:go-offline
 
