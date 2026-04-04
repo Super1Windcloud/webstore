@@ -103,13 +103,20 @@ docker compose up -d
 Then start the Spring Boot app locally with PostgreSQL from Docker:
 
 ```powershell
-$env:SPRING_DATASOURCE_URL="jdbc:postgresql://localhost:5432/webstore"
-$env:SPRING_DATASOURCE_DRIVER_CLASS_NAME="org.postgresql.Driver"
-$env:SPRING_DATASOURCE_USERNAME="webstore"
-$env:SPRING_DATASOURCE_PASSWORD="webstore"
-$env:SPRING_H2_CONSOLE_ENABLED="false"
-$env:WEBSTORE_SECURITY_JWT_SECRET="change-this-jwt-secret-before-production-use"
+Copy `.env.example` to `.env` and adjust values if needed, then run:
+
+```powershell
 .\mvnw.cmd spring-boot:run
+```
+
+Example `.env`:
+
+```dotenv
+spring.datasource.url=jdbc:postgresql://localhost:5432/webstore
+spring.datasource.driver-class-name=org.postgresql.Driver
+spring.datasource.username=webstore
+spring.datasource.password=webstore
+webstore.security.jwt-secret=base64:Tb7kEZEE3cU/PNyms78qKCuNfwcCepjhLd7TGdnU5L0=
 ```
 
 In this mode:

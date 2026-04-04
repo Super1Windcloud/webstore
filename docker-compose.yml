@@ -16,7 +16,7 @@ services:
       SPRING_DATASOURCE_USERNAME: webstore
       SPRING_DATASOURCE_PASSWORD: webstore
       SPRING_H2_CONSOLE_ENABLED: "false"
-      WEBSTORE_SECURITY_JWT_SECRET: change-this-jwt-secret-before-production-use
+      WEBSTORE_SECURITY_JWT_SECRET: Tb7kEZEE3cU/PNyms78qKCuNfwcCepjhLd7TGdnU5L0=
     labels:
       traefik.enable: "true"
       traefik.http.routers.webstore.rule: Host(`localhost`)

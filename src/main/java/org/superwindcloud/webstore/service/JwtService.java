@@ -58,13 +58,11 @@ public class JwtService {
   }
 
   private SecretKey getSigningKey() {
-    String secret = securityProperties.jwtSecret();
-    byte[] keyBytes;
-    try {
-      keyBytes = Decoders.BASE64.decode(secret);
-    } catch (IllegalArgumentException ex) {
-      keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-    }
+    String secret = securityProperties.jwtSecret().trim();
+    byte[] keyBytes =
+        secret.startsWith("base64:")
+            ? Decoders.BASE64.decode(secret.substring("base64:".length()))
+            : secret.getBytes(StandardCharsets.UTF_8);
     return Keys.hmacShaKeyFor(keyBytes);
   }
 }
