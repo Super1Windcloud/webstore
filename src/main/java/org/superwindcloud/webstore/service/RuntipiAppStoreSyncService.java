@@ -7,6 +7,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -165,6 +167,39 @@ public class RuntipiAppStoreSyncService {
     log.info("Synced {} app definitions from runtipi-appstore", apps.size());
   }
 
+  @Transactional
+  public boolean refreshDefinitionFromLocalConfig(AppDefinition appDefinition) {
+    Path configPath =
+        Path.of(appStoreProperties.localAppsPath(), appDefinition.getSlug(), "config.json");
+    if (!Files.exists(configPath)) {
+      return false;
+    }
+
+    try {
+      Map<String, Object> config = jsonParser.parseMap(Files.readString(configPath));
+      AppDefinitionPayload payload =
+          toPayload(appDefinition.getSlug(), config, Map.of(), configPath.toString());
+      appDefinition.updateCatalogMetadata(
+          payload.name(),
+          payload.category(),
+          payload.description(),
+          payload.accentColor(),
+          payload.icon(),
+          payload.port());
+      log.info(
+          "Refreshed app definition '{}' from local config with port '{}'",
+          appDefinition.getSlug(),
+          payload.port());
+      return true;
+    } catch (Exception ex) {
+      log.warn(
+          "Failed to refresh app definition '{}' from local config: {}",
+          appDefinition.getSlug(),
+          ex.getMessage());
+      return false;
+    }
+  }
+
   private List<AppStoreCard> fetchRemoteCards(Map<String, InstalledAppStatus> installedStatusBySlug)
       throws IOException, InterruptedException {
     List<AppDefinitionPayload> apps = parseApps(downloadZipStream());
@@ -261,66 +296,79 @@ public class RuntipiAppStoreSyncService {
 
     List<AppDefinitionPayload> apps = new ArrayList<>();
     for (ConfigEntry entry : configEntries) {
-      Map<String, Object> config = entry.config();
-      if (!Boolean.TRUE.equals(config.get("available"))) {
-        continue;
+      AppDefinitionPayload payload =
+          toPayload(
+              entry.slug(),
+              entry.config(),
+              descriptionsBySlug,
+              "zip:" + entry.slug() + "/config.json");
+      if (payload != null) {
+        apps.add(payload);
       }
-
-      String slug = stringValue(config.get("id")).orElse(entry.slug());
-      String name = stringValue(config.get("name")).orElse(slug);
-      String category =
-          Optional.ofNullable(config.get("categories"))
-              .filter(List.class::isInstance)
-              .map(List.class::cast)
-              .filter(categories -> !categories.isEmpty())
-              .map(categories -> stringValue(categories.get(0)).orElse(FALLBACK_CATEGORY))
-              .map(this::normalizeCategory)
-              .orElse(FALLBACK_CATEGORY);
-      String description =
-          truncate(
-              firstNonBlank(
-                  stringValue(config.get("short_desc")).orElse(null),
-                  stringValue(config.get("description")).orElse(null),
-                  FALLBACK_DESCRIPTION),
-              255);
-      String longDescription =
-          firstNonBlank(
-              stringValue(config.get("description")).orElse(null),
-              stringValue(config.get("short_desc")).orElse(null),
-              FALLBACK_DESCRIPTION);
-      String metadataDescription = descriptionsBySlug.getOrDefault(slug, "");
-      String version = stringValue(config.get("version")).orElse("Unknown");
-      String author = stringValue(config.get("author")).orElse("Unknown");
-      String sourceUrl = stringValue(config.get("source")).orElse(null);
-      String port = config.containsKey("port") ? String.valueOf(config.get("port")) : "Unknown";
-      String tipiVersion =
-          firstNonBlank(
-              stringValue(config.get("min_tipi_version")).orElse(null),
-              config.containsKey("tipi_version")
-                  ? String.valueOf(config.get("tipi_version"))
-                  : null,
-              "Unknown");
-      List<String> architectures = extractArchitectures(config.get("supported_architectures"));
-
-      apps.add(
-          new AppDefinitionPayload(
-              slug,
-              truncate(name, 120),
-              category,
-              description,
-              longDescription,
-              metadataDescription,
-              colorFor(slug),
-              initialsFor(name),
-              version,
-              author,
-              sourceUrl,
-              port,
-              tipiVersion,
-              architectures));
     }
 
     return apps;
+  }
+
+  private AppDefinitionPayload toPayload(
+      String fallbackSlug,
+      Map<String, Object> config,
+      Map<String, String> descriptionsBySlug,
+      String sourceName) {
+    if (!Boolean.TRUE.equals(config.get("available"))) {
+      return null;
+    }
+
+    String slug = stringValue(config.get("id")).orElse(fallbackSlug);
+    String name = stringValue(config.get("name")).orElse(slug);
+    String category =
+        Optional.ofNullable(config.get("categories"))
+            .filter(List.class::isInstance)
+            .map(List.class::cast)
+            .filter(categories -> !categories.isEmpty())
+            .map(categories -> stringValue(categories.get(0)).orElse(FALLBACK_CATEGORY))
+            .map(this::normalizeCategory)
+            .orElse(FALLBACK_CATEGORY);
+    String description =
+        truncate(
+            firstNonBlank(
+                stringValue(config.get("short_desc")).orElse(null),
+                stringValue(config.get("description")).orElse(null),
+                FALLBACK_DESCRIPTION),
+            255);
+    String longDescription =
+        firstNonBlank(
+            stringValue(config.get("description")).orElse(null),
+            stringValue(config.get("short_desc")).orElse(null),
+            FALLBACK_DESCRIPTION);
+    String metadataDescription = descriptionsBySlug.getOrDefault(slug, "");
+    String version = stringValue(config.get("version")).orElse("Unknown");
+    String author = stringValue(config.get("author")).orElse("Unknown");
+    String sourceUrl = stringValue(config.get("source")).orElse(null);
+    String port = config.containsKey("port") ? String.valueOf(config.get("port")) : "Unknown";
+    String tipiVersion =
+        firstNonBlank(
+            stringValue(config.get("min_tipi_version")).orElse(null),
+            config.containsKey("tipi_version") ? String.valueOf(config.get("tipi_version")) : null,
+            "Unknown");
+    List<String> architectures = extractArchitectures(config.get("supported_architectures"));
+
+    log.debug("Parsed app definition '{}' from {}", slug, sourceName);
+    return new AppDefinitionPayload(
+        slug,
+        truncate(name, 120),
+        category,
+        description,
+        longDescription,
+        metadataDescription,
+        colorFor(slug),
+        initialsFor(name),
+        version,
+        author,
+        sourceUrl,
+        port,
+        tipiVersion,
+        architectures);
   }
 
   private Optional<String> stringValue(Object value) {

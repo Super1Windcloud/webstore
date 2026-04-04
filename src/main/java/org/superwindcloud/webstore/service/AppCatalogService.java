@@ -126,7 +126,7 @@ public class AppCatalogService {
 
   @Transactional
   public void installApp(UserAccount user, String slug) {
-    AppDefinition appDefinition = getAppDefinition(slug);
+    AppDefinition appDefinition = getRuntimeAppDefinition(slug);
     appRuntimeService.install(appDefinition);
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
@@ -140,7 +140,7 @@ public class AppCatalogService {
 
   @Transactional
   public void uninstallApp(UserAccount user, String slug) {
-    AppDefinition appDefinition = getAppDefinition(slug);
+    AppDefinition appDefinition = getRuntimeAppDefinition(slug);
     appRuntimeService.uninstall(appDefinition);
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
@@ -153,7 +153,7 @@ public class AppCatalogService {
 
   @Transactional
   public void updateStatus(UserAccount user, String slug, InstalledAppStatus status) {
-    AppDefinition appDefinition = getAppDefinition(slug);
+    AppDefinition appDefinition = getRuntimeAppDefinition(slug);
     InstalledApp installedApp =
         installedAppRepository
             .findByUserAndAppDefinition(user, appDefinition)
@@ -176,11 +176,12 @@ public class AppCatalogService {
         .findAllByUserOrderByInstalledAtDesc(user)
         .forEach(
             app -> {
+              AppDefinition appDefinition = prepareRuntimeAppDefinition(app.getAppDefinition());
               if (status == InstalledAppStatus.RUNNING) {
-                appRuntimeService.start(app.getAppDefinition());
+                appRuntimeService.start(appDefinition);
               }
               if (status == InstalledAppStatus.STOPPED) {
-                appRuntimeService.stop(app.getAppDefinition());
+                appRuntimeService.stop(appDefinition);
               }
               app.setStatus(status);
             });
@@ -235,5 +236,18 @@ public class AppCatalogService {
     return appDefinitionRepository
         .findBySlug(slug)
         .orElseThrow(() -> new IllegalArgumentException("App not found"));
+  }
+
+  private AppDefinition getRuntimeAppDefinition(String slug) {
+    return prepareRuntimeAppDefinition(getAppDefinition(slug));
+  }
+
+  private AppDefinition prepareRuntimeAppDefinition(AppDefinition appDefinition) {
+    if (appDefinition.getPort() == null
+        || appDefinition.getPort().isBlank()
+        || "Unknown".equalsIgnoreCase(appDefinition.getPort())) {
+      runtipiAppStoreSyncService.refreshDefinitionFromLocalConfig(appDefinition);
+    }
+    return appDefinition;
   }
 }
