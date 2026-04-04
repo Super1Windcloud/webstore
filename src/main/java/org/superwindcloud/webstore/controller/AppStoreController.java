@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.service.AppCatalogService;
+import org.superwindcloud.webstore.service.AppOperationException;
 import org.superwindcloud.webstore.service.CurrentUserService;
 import org.superwindcloud.webstore.service.RuntipiAppStoreSyncService;
 
@@ -55,7 +56,13 @@ public class AppStoreController {
       @PathVariable String slug,
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
-    appCatalogService.installApp(currentUserService.requireUser(authentication), slug);
+    try {
+      appCatalogService.installApp(currentUserService.requireUser(authentication), slug);
+    } catch (AppOperationException | IllegalArgumentException ex) {
+      redirectAttributes.addFlashAttribute("toastType", "danger");
+      redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+      return "redirect:/app-store";
+    }
     redirectAttributes.addFlashAttribute("toastType", "success");
     redirectAttributes.addFlashAttribute("toastMessage", "应用已安装并启动");
     return "redirect:/app-store";

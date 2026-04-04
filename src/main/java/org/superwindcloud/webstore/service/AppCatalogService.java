@@ -30,18 +30,21 @@ public class AppCatalogService {
   private final AppStoreProperties appStoreProperties;
   private final RuntipiAppStoreSyncService runtipiAppStoreSyncService;
   private final MarkdownRendererService markdownRendererService;
+  private final AppRuntimeService appRuntimeService;
 
   public AppCatalogService(
       AppDefinitionRepository appDefinitionRepository,
       InstalledAppRepository installedAppRepository,
       AppStoreProperties appStoreProperties,
       RuntipiAppStoreSyncService runtipiAppStoreSyncService,
-      MarkdownRendererService markdownRendererService) {
+      MarkdownRendererService markdownRendererService,
+      AppRuntimeService appRuntimeService) {
     this.appDefinitionRepository = appDefinitionRepository;
     this.installedAppRepository = installedAppRepository;
     this.appStoreProperties = appStoreProperties;
     this.runtipiAppStoreSyncService = runtipiAppStoreSyncService;
     this.markdownRendererService = markdownRendererService;
+    this.appRuntimeService = appRuntimeService;
   }
 
   @Transactional(readOnly = true)
@@ -124,6 +127,7 @@ public class AppCatalogService {
   @Transactional
   public void installApp(UserAccount user, String slug) {
     AppDefinition appDefinition = getAppDefinition(slug);
+    appRuntimeService.install(appDefinition);
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
         .orElseGet(
@@ -137,6 +141,7 @@ public class AppCatalogService {
   @Transactional
   public void uninstallApp(UserAccount user, String slug) {
     AppDefinition appDefinition = getAppDefinition(slug);
+    appRuntimeService.uninstall(appDefinition);
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
         .ifPresent(
@@ -153,6 +158,12 @@ public class AppCatalogService {
         installedAppRepository
             .findByUserAndAppDefinition(user, appDefinition)
             .orElseThrow(() -> new IllegalArgumentException("App is not installed"));
+    if (status == InstalledAppStatus.RUNNING) {
+      appRuntimeService.start(appDefinition);
+    }
+    if (status == InstalledAppStatus.STOPPED) {
+      appRuntimeService.stop(appDefinition);
+    }
     log.info("Updating app '{}' for user '{}' to status '{}'", slug, user.getUsername(), status);
     installedApp.setStatus(status);
   }
@@ -163,7 +174,16 @@ public class AppCatalogService {
         "Updating all installed apps for user '{}' to status '{}'", user.getUsername(), status);
     installedAppRepository
         .findAllByUserOrderByInstalledAtDesc(user)
-        .forEach(app -> app.setStatus(status));
+        .forEach(
+            app -> {
+              if (status == InstalledAppStatus.RUNNING) {
+                appRuntimeService.start(app.getAppDefinition());
+              }
+              if (status == InstalledAppStatus.STOPPED) {
+                appRuntimeService.stop(app.getAppDefinition());
+              }
+              app.setStatus(status);
+            });
   }
 
   private List<AppStoreCard> mapStoreCards(

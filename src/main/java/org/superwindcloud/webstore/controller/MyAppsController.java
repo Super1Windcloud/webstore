@@ -10,6 +10,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.superwindcloud.webstore.domain.InstalledAppStatus;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.service.AppCatalogService;
+import org.superwindcloud.webstore.service.AppOperationException;
 import org.superwindcloud.webstore.service.CurrentUserService;
 import org.superwindcloud.webstore.service.RuntipiAppStoreSyncService;
 
@@ -56,8 +57,14 @@ public class MyAppsController {
       @PathVariable String slug,
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
-    appCatalogService.updateStatus(
-        currentUserService.requireUser(authentication), slug, InstalledAppStatus.RUNNING);
+    try {
+      appCatalogService.updateStatus(
+          currentUserService.requireUser(authentication), slug, InstalledAppStatus.RUNNING);
+    } catch (AppOperationException | IllegalArgumentException ex) {
+      redirectAttributes.addFlashAttribute("toastType", "danger");
+      redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+      return "redirect:/my-apps";
+    }
     redirectAttributes.addFlashAttribute("toastType", "success");
     redirectAttributes.addFlashAttribute("toastMessage", "应用已启动");
     return "redirect:/my-apps";
@@ -68,8 +75,14 @@ public class MyAppsController {
       @PathVariable String slug,
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
-    appCatalogService.updateStatus(
-        currentUserService.requireUser(authentication), slug, InstalledAppStatus.STOPPED);
+    try {
+      appCatalogService.updateStatus(
+          currentUserService.requireUser(authentication), slug, InstalledAppStatus.STOPPED);
+    } catch (AppOperationException | IllegalArgumentException ex) {
+      redirectAttributes.addFlashAttribute("toastType", "danger");
+      redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+      return "redirect:/my-apps";
+    }
     redirectAttributes.addFlashAttribute("toastType", "warning");
     redirectAttributes.addFlashAttribute("toastMessage", "应用已停止");
     return "redirect:/my-apps";
@@ -80,7 +93,13 @@ public class MyAppsController {
       @PathVariable String slug,
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
-    appCatalogService.uninstallApp(currentUserService.requireUser(authentication), slug);
+    try {
+      appCatalogService.uninstallApp(currentUserService.requireUser(authentication), slug);
+    } catch (AppOperationException | IllegalArgumentException ex) {
+      redirectAttributes.addFlashAttribute("toastType", "danger");
+      redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+      return "redirect:/my-apps";
+    }
     redirectAttributes.addFlashAttribute("toastType", "danger");
     redirectAttributes.addFlashAttribute("toastMessage", "应用已卸载");
     return "redirect:/my-apps";
@@ -88,8 +107,14 @@ public class MyAppsController {
 
   @PostMapping("/my-apps/start-all")
   public String startAllApps(Authentication authentication, RedirectAttributes redirectAttributes) {
-    appCatalogService.updateAllStatuses(
-        currentUserService.requireUser(authentication), InstalledAppStatus.RUNNING);
+    try {
+      appCatalogService.updateAllStatuses(
+          currentUserService.requireUser(authentication), InstalledAppStatus.RUNNING);
+    } catch (AppOperationException | IllegalArgumentException ex) {
+      redirectAttributes.addFlashAttribute("toastType", "danger");
+      redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+      return "redirect:/my-apps";
+    }
     redirectAttributes.addFlashAttribute("toastType", "success");
     redirectAttributes.addFlashAttribute("toastMessage", "所有应用已启动");
     return "redirect:/my-apps";
@@ -97,8 +122,14 @@ public class MyAppsController {
 
   @PostMapping("/my-apps/stop-all")
   public String stopAllApps(Authentication authentication, RedirectAttributes redirectAttributes) {
-    appCatalogService.updateAllStatuses(
-        currentUserService.requireUser(authentication), InstalledAppStatus.STOPPED);
+    try {
+      appCatalogService.updateAllStatuses(
+          currentUserService.requireUser(authentication), InstalledAppStatus.STOPPED);
+    } catch (AppOperationException | IllegalArgumentException ex) {
+      redirectAttributes.addFlashAttribute("toastType", "danger");
+      redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
+      return "redirect:/my-apps";
+    }
     redirectAttributes.addFlashAttribute("toastType", "warning");
     redirectAttributes.addFlashAttribute("toastMessage", "所有应用已停止");
     return "redirect:/my-apps";
