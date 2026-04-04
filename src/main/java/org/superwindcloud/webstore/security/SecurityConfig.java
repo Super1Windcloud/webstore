@@ -25,7 +25,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+  SecurityFilterChain securityFilterChain(HttpSecurity http) {
     http.csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .httpBasic(AbstractHttpConfigurer::disable)
@@ -50,8 +50,7 @@ public class SecurityConfig {
   }
 
   @Bean
-  AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
-      throws Exception {
+  AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) {
     return configuration.getAuthenticationManager();
   }
 

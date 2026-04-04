@@ -89,7 +89,9 @@ public class AppCatalogService {
                     installedApp.getAppDefinition().getAccentColor(),
                     installedApp.getAppDefinition().getIcon(),
                     logoUrlFor(installedApp.getAppDefinition().getSlug()),
-                    appHomeUrl(installedApp.getAppDefinition().getSlug(), null),
+                    appHomeUrl(
+                        installedApp.getAppDefinition().getSlug(),
+                        installedApp.getAppDefinition().getPort()),
                     installedApp.getStatus(),
                     installedApp.getInstalledAt()))
         .toList();

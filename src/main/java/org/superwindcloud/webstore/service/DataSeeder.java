@@ -25,42 +25,48 @@ public class DataSeeder {
                   "Productivity",
                   "Private cloud storage, collaboration, and file sharing for teams.",
                   "#4da3ff",
-                  "NC"),
+                  "NC",
+                  "Unknown"),
               new AppDefinition(
                   "vaultwarden",
                   "Vaultwarden",
                   "Security",
                   "Lightweight password manager compatible with Bitwarden clients.",
                   "#6ee7b7",
-                  "VW"),
+                  "VW",
+                  "Unknown"),
               new AppDefinition(
                   "jellyfin",
                   "Jellyfin",
                   "Media",
                   "Stream and organize your personal media library from one dashboard.",
                   "#f59e0b",
-                  "JF"),
+                  "JF",
+                  "Unknown"),
               new AppDefinition(
                   "gitea",
                   "Gitea",
                   "Development",
                   "Self-hosted Git service with repositories, issues, and CI integrations.",
                   "#ef4444",
-                  "GT"),
+                  "GT",
+                  "Unknown"),
               new AppDefinition(
                   "n8n",
                   "n8n",
                   "Automation",
                   "Workflow automation for internal tools, sync jobs, and app integrations.",
                   "#c084fc",
-                  "N8"),
+                  "N8",
+                  "Unknown"),
               new AppDefinition(
                   "uptime-kuma",
                   "Uptime Kuma",
                   "Monitoring",
                   "Status monitoring for services, endpoints, and infrastructure health.",
                   "#22c55e",
-                  "UK")));
+                  "UK",
+                  "Unknown")));
     };
   }
 

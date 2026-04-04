@@ -33,6 +33,9 @@ public class AppDefinition {
   @Column(nullable = false, length = 32)
   private String icon;
 
+  @Column(length = 32)
+  private String port;
+
   protected AppDefinition() {}
 
   public AppDefinition(
@@ -41,13 +44,15 @@ public class AppDefinition {
       String category,
       String description,
       String accentColor,
-      String icon) {
+      String icon,
+      String port) {
     this.slug = slug;
     this.name = name;
     this.category = category;
     this.description = description;
     this.accentColor = accentColor;
     this.icon = icon;
+    this.port = port;
   }
 
   public Long getId() {
@@ -78,12 +83,22 @@ public class AppDefinition {
     return icon;
   }
 
+  public String getPort() {
+    return port;
+  }
+
   public void updateCatalogMetadata(
-      String name, String category, String description, String accentColor, String icon) {
+      String name,
+      String category,
+      String description,
+      String accentColor,
+      String icon,
+      String port) {
     this.name = name;
     this.category = category;
     this.description = description;
     this.accentColor = accentColor;
     this.icon = icon;
+    this.port = port;
   }
 }

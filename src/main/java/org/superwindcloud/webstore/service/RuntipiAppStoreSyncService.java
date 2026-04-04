@@ -134,7 +134,7 @@ public class RuntipiAppStoreSyncService {
           "Unknown",
           "Unknown",
           null,
-          "Unknown",
+          appDefinition.getPort(),
           "Unknown",
           List.of());
     }
@@ -352,7 +352,8 @@ public class RuntipiAppStoreSyncService {
                     payload.category(),
                     payload.description(),
                     payload.accentColor(),
-                    payload.icon()),
+                    payload.icon(),
+                    payload.port()),
             () ->
                 appDefinitionRepository.save(
                     new AppDefinition(
@@ -361,7 +362,8 @@ public class RuntipiAppStoreSyncService {
                         payload.category(),
                         payload.description(),
                         payload.accentColor(),
-                        payload.icon())));
+                        payload.icon(),
+                        payload.port())));
   }
 
   private String normalizeCategory(String category) {
