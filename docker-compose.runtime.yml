@@ -1,8 +1,8 @@
 services:
   runtime-agent:
     build:
-      context: ./runtime-agent
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: runtime-agent/Dockerfile
     container_name: webstore-runtime-agent
     restart: unless-stopped
     ports:
