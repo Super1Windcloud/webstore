@@ -18,7 +18,7 @@ public class RuntimeAgentExceptionHandler {
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
-  public ResponseEntity<Map<String, String>> handleValidation(MethodArgumentNotValidException ex) {
+  public ResponseEntity<Map<String, String>> handleValidation() {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
         .body(Map.of("status", "error", "message", "请求参数无效"));
   }
