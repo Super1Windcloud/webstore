@@ -115,7 +115,7 @@ $env:WEBSTORE_SECURITY_JWT_SECRET="change-this-jwt-secret-before-production-use"
 In this mode:
 
 - `postgres` runs in Docker and is exposed on `localhost:5432`
-- `traefik` runs in Docker and forwards `http://localhost` to your local Spring Boot app on port `8080`
+- `traefik` runs in Docker and forwards `http://localhost:8088` to your local Spring Boot app on port `8080`
 - `webstore` itself does not need to run in Docker
 
 Start the full containerized stack when needed:
@@ -133,7 +133,7 @@ docker compose --profile app up -d --build
 Then open:
 
 ```text
-http://localhost
+http://localhost:8088
 ```
 
 Traefik dashboard:
@@ -147,7 +147,7 @@ Notes:
 - `postgres` and `traefik` start by default with `docker compose up -d`.
 - `webstore` is under the `app` profile.
 - The Traefik local-development route points to `http://host.docker.internal:8080`.
-- If port `80` is already in use, change the Traefik port mapping in `docker-compose.yml`.
+- Traefik is mapped to host port `8088` by default to avoid conflicts on port `80`.
 - The default PostgreSQL and JWT credentials in `docker-compose.yml` are for local development only.
 - Local PostgreSQL data is stored in `./docker-data/postgres`.
 
