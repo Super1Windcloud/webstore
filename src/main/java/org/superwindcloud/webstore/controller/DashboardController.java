@@ -7,17 +7,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.service.AppCatalogService;
 import org.superwindcloud.webstore.service.CurrentUserService;
+import org.superwindcloud.webstore.service.SystemMetricsService;
 
 @Controller
 public class DashboardController {
 
   private final CurrentUserService currentUserService;
   private final AppCatalogService appCatalogService;
+  private final SystemMetricsService systemMetricsService;
 
   public DashboardController(
-      CurrentUserService currentUserService, AppCatalogService appCatalogService) {
+      CurrentUserService currentUserService,
+      AppCatalogService appCatalogService,
+      SystemMetricsService systemMetricsService) {
     this.currentUserService = currentUserService;
     this.appCatalogService = appCatalogService;
+    this.systemMetricsService = systemMetricsService;
   }
 
   @GetMapping("/dashboard")
@@ -27,6 +32,7 @@ public class DashboardController {
     model.addAttribute("activeNav", "dashboard");
     model.addAttribute("username", user.getUsername());
     model.addAttribute("summary", appCatalogService.getDashboardSummary(user));
+    model.addAttribute("systemOverview", systemMetricsService.getSystemOverview());
     model.addAttribute(
         "recentApps", appCatalogService.getInstalledApps(user).stream().limit(3).toList());
     model.addAttribute(

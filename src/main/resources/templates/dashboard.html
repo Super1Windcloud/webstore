@@ -8,7 +8,10 @@
     <div>
       <p class="eyebrow">控制面板</p>
       <h1>欢迎回来，<span th:text="${username}">user</span></h1>
-      <p>这里汇总你当前的已安装应用、运行状态，以及可快速安装的热门应用。</p>
+      <p>
+        这里汇总你当前的已安装应用、运行状态，以及主机
+        <span th:text="${systemOverview.hostName}">localhost</span> 的资源使用情况。
+      </p>
     </div>
     <div class="hero-metrics">
       <div class="metric-card">
@@ -27,6 +30,30 @@
         <span>已停止</span>
         <strong th:text="${summary.stoppedApps}">0</strong>
       </div>
+    </div>
+  </section>
+
+  <section class="panel system-panel">
+    <div class="panel-head">
+      <h2>主机资源</h2>
+      <span class="muted" th:text="${systemOverview.hostName}">localhost</span>
+    </div>
+    <div class="system-grid">
+      <article class="metric-card">
+        <span th:text="${systemOverview.diskSpace.title}">磁盘空间</span>
+        <strong th:text="${systemOverview.diskSpace.primaryValue}">0%</strong>
+        <small th:text="${systemOverview.diskSpace.secondaryValue}">0 GB / 0 GB 已使用</small>
+      </article>
+      <article class="metric-card">
+        <span th:text="${systemOverview.cpuLoad.title}">CPU负载</span>
+        <strong th:text="${systemOverview.cpuLoad.primaryValue}">0%</strong>
+        <small th:text="${systemOverview.cpuLoad.secondaryValue}">0 核可用</small>
+      </article>
+      <article class="metric-card">
+        <span th:text="${systemOverview.memoryUsage.title}">内存占用</span>
+        <strong th:text="${systemOverview.memoryUsage.primaryValue}">0%</strong>
+        <small th:text="${systemOverview.memoryUsage.secondaryValue}">0 GB / 0 GB 已使用</small>
+      </article>
     </div>
   </section>
 

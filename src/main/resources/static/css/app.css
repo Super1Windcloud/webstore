@@ -225,7 +225,8 @@ small,
 .hero-metrics,
 .content-grid,
 .store-grid,
-.settings-grid {
+.settings-grid,
+.system-grid {
   display: grid;
   gap: 20px;
 }
@@ -247,9 +248,23 @@ small,
   font-size: 2rem;
 }
 
+.metric-card small {
+  display: block;
+  margin-top: 10px;
+  color: var(--muted);
+}
+
 .content-grid {
   grid-template-columns: 1fr 1fr;
   margin-top: 24px;
+}
+
+.system-panel {
+  margin-top: 24px;
+}
+
+.system-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .panel,
@@ -435,7 +450,8 @@ small,
 
   .hero-metrics,
   .store-grid.compact,
-  .settings-grid {
+  .settings-grid,
+  .system-grid {
     grid-template-columns: 1fr;
   }
 
