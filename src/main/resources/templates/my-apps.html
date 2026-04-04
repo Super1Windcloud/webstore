@@ -39,7 +39,9 @@
           </div>
         </div>
         <div class="app-row-actions">
-          <span class="status-pill" th:text="${app.status}">RUNNING</span>
+          <span class="status-pill"
+                th:classappend="${app.status.name() == 'RUNNING'} ? ' status-running' : ' status-stopped'"
+                th:text="${app.status}">RUNNING</span>
           <form th:if="${app.status.name() == 'RUNNING'}" th:action="@{/my-apps/{slug}/stop(slug=${app.slug})}" method="post">
             <button class="secondary-button" type="submit">停止</button>
           </form>

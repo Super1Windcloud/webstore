@@ -38,7 +38,10 @@
         </div>
       </a>
       <div class="store-card-bottom">
-        <span class="status-pill" th:if="${app.installed}" th:text="${app.status}">RUNNING</span>
+        <span class="status-pill"
+              th:if="${app.installed}"
+              th:classappend="${app.status != null and app.status.name() == 'RUNNING'} ? ' status-running' : ' status-stopped'"
+              th:text="${app.status}">RUNNING</span>
         <form th:if="${!app.installed}" th:action="@{/app-store/{slug}/install(slug=${app.slug})}" method="post">
           <button class="primary-button" type="submit">安装</button>
         </form>

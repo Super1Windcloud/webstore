@@ -8,8 +8,14 @@
   --line: rgba(160, 190, 220, 0.14);
   --primary: #7dd3fc;
   --primary-strong: #38bdf8;
+  --secondary: #c084fc;
+  --secondary-strong: #8b5cf6;
+  --ghost: #f59e0b;
+  --ghost-strong: #d97706;
   --danger: #fb7185;
   --success: #4ade80;
+  --warning: #fbbf24;
+  --info: #60a5fa;
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
 }
 
@@ -23,8 +29,14 @@
   --line: rgba(25, 48, 79, 0.12);
   --primary: #0f766e;
   --primary-strong: #115e59;
+  --secondary: #7c3aed;
+  --secondary-strong: #6d28d9;
+  --ghost: #d97706;
+  --ghost-strong: #b45309;
   --danger: #e11d48;
   --success: #15803d;
+  --warning: #b45309;
+  --info: #1d4ed8;
   --shadow: 0 24px 80px rgba(18, 32, 57, 0.12);
 }
 
@@ -175,8 +187,6 @@ small,
 }
 
 .theme-toggle,
-.ghost-button,
-.secondary-button,
 .link-button {
   background: var(--surface);
   color: var(--text);
@@ -188,8 +198,21 @@ small,
   color: white;
 }
 
+.secondary-button {
+  background: linear-gradient(135deg, var(--secondary), var(--secondary-strong));
+  border-color: transparent;
+  color: white;
+}
+
+.ghost-button {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: var(--ghost);
+}
+
 .danger-button {
   background: rgba(251, 113, 133, 0.1);
+  border-color: rgba(251, 113, 133, 0.28);
   color: var(--danger);
 }
 
@@ -204,6 +227,34 @@ small,
 
 .user-chip {
   font-weight: 600;
+}
+
+.category-chip {
+  background: rgba(96, 165, 250, 0.12);
+  border-color: rgba(96, 165, 250, 0.28);
+  color: var(--info);
+}
+
+.status-pill {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.28);
+  color: var(--success);
+}
+
+.status-pill:not(:empty) {
+  font-weight: 600;
+}
+
+.status-pill.status-running {
+  background: rgba(74, 222, 128, 0.12);
+  border-color: rgba(74, 222, 128, 0.28);
+  color: var(--success);
+}
+
+.status-pill.status-stopped {
+  background: rgba(251, 191, 36, 0.12);
+  border-color: rgba(251, 191, 36, 0.28);
+  color: var(--warning);
 }
 
 .page-shell {
@@ -567,6 +618,16 @@ small,
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.primary-button:hover,
+.secondary-button:hover,
+.ghost-button:hover,
+.danger-button:hover,
+.theme-toggle:hover,
+.link-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
 }
 
 @media (max-width: 980px) {

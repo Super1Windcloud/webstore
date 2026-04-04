@@ -74,7 +74,9 @@
             </a>
             <p th:text="${app.description}">Description</p>
           </div>
-          <span class="status-pill" th:text="${app.status}">RUNNING</span>
+          <span class="status-pill"
+                th:classappend="${app.status.name() == 'RUNNING'} ? ' status-running' : ' status-stopped'"
+                th:text="${app.status}">RUNNING</span>
         </article>
       </div>
       <div class="empty-state" th:if="${#lists.isEmpty(recentApps)}">
