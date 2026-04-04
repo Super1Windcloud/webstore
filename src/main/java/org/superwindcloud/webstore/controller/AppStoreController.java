@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.service.AppCatalogService;
 import org.superwindcloud.webstore.service.CurrentUserService;
@@ -50,8 +51,13 @@ public class AppStoreController {
   }
 
   @PostMapping("/app-store/{slug}/install")
-  public String install(@PathVariable String slug, Authentication authentication) {
+  public String install(
+      @PathVariable String slug,
+      Authentication authentication,
+      RedirectAttributes redirectAttributes) {
     appCatalogService.installApp(currentUserService.requireUser(authentication), slug);
+    redirectAttributes.addFlashAttribute("toastType", "success");
+    redirectAttributes.addFlashAttribute("toastMessage", "应用已安装并启动");
     return "redirect:/app-store";
   }
 }

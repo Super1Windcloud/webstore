@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.superwindcloud.webstore.config.AppStoreProperties;
@@ -20,6 +22,8 @@ import org.superwindcloud.webstore.repository.InstalledAppRepository;
 
 @Service
 public class AppCatalogService {
+
+  private static final Logger log = LoggerFactory.getLogger(AppCatalogService.class);
 
   private final AppDefinitionRepository appDefinitionRepository;
   private final InstalledAppRepository installedAppRepository;
@@ -123,9 +127,11 @@ public class AppCatalogService {
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
         .orElseGet(
-            () ->
-                installedAppRepository.save(
-                    new InstalledApp(user, appDefinition, InstalledAppStatus.RUNNING)));
+            () -> {
+              log.info("Installing app '{}' for user '{}'", slug, user.getUsername());
+              return installedAppRepository.save(
+                  new InstalledApp(user, appDefinition, InstalledAppStatus.RUNNING));
+            });
   }
 
   @Transactional
@@ -133,7 +139,11 @@ public class AppCatalogService {
     AppDefinition appDefinition = getAppDefinition(slug);
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
-        .ifPresent(installedAppRepository::delete);
+        .ifPresent(
+            installedApp -> {
+              log.info("Uninstalling app '{}' for user '{}'", slug, user.getUsername());
+              installedAppRepository.delete(installedApp);
+            });
   }
 
   @Transactional
@@ -143,11 +153,14 @@ public class AppCatalogService {
         installedAppRepository
             .findByUserAndAppDefinition(user, appDefinition)
             .orElseThrow(() -> new IllegalArgumentException("App is not installed"));
+    log.info("Updating app '{}' for user '{}' to status '{}'", slug, user.getUsername(), status);
     installedApp.setStatus(status);
   }
 
   @Transactional
   public void updateAllStatuses(UserAccount user, InstalledAppStatus status) {
+    log.info(
+        "Updating all installed apps for user '{}' to status '{}'", user.getUsername(), status);
     installedAppRepository
         .findAllByUserOrderByInstalledAtDesc(user)
         .forEach(app -> app.setStatus(status));

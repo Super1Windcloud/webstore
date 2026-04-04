@@ -48,4 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
     searchInput.addEventListener("input", updateSearch);
     updateSearch();
   }
+
+  document.querySelectorAll("[data-toast]").forEach((toast) => {
+    const dismiss = () => {
+      toast.classList.add("toast-leaving");
+      window.setTimeout(() => toast.remove(), 220);
+    };
+
+    window.setTimeout(dismiss, 2800);
+    toast.querySelector("[data-toast-close]")?.addEventListener("click", dismiss);
+  });
 });

@@ -40,5 +40,17 @@
     </form>
   </div>
 </header>
+<div class="toast-stack" th:fragment="toast(message, type)">
+  <div class="toast"
+       th:if="${message != null}"
+       th:classappend="${type != null ? ' toast-' + type : ' toast-success'}"
+       data-toast>
+    <div class="toast-body">
+      <strong th:text="${type == 'danger' ? '操作失败' : '操作完成'}">操作完成</strong>
+      <span th:text="${message}">操作已完成</span>
+    </div>
+    <button class="toast-close" type="button" data-toast-close>关闭</button>
+  </div>
+</div>
 </body>
 </html>

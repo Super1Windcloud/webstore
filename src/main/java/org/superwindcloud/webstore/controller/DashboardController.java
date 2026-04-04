@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.service.AppCatalogService;
 import org.superwindcloud.webstore.service.CurrentUserService;
+import org.superwindcloud.webstore.service.RuntipiAppStoreSyncService;
 import org.superwindcloud.webstore.service.SystemMetricsService;
 
 @Controller
@@ -15,18 +16,22 @@ public class DashboardController {
   private final CurrentUserService currentUserService;
   private final AppCatalogService appCatalogService;
   private final SystemMetricsService systemMetricsService;
+  private final RuntipiAppStoreSyncService runtipiAppStoreSyncService;
 
   public DashboardController(
       CurrentUserService currentUserService,
       AppCatalogService appCatalogService,
-      SystemMetricsService systemMetricsService) {
+      SystemMetricsService systemMetricsService,
+      RuntipiAppStoreSyncService runtipiAppStoreSyncService) {
     this.currentUserService = currentUserService;
     this.appCatalogService = appCatalogService;
     this.systemMetricsService = systemMetricsService;
+    this.runtipiAppStoreSyncService = runtipiAppStoreSyncService;
   }
 
   @GetMapping("/dashboard")
   public String dashboard(Authentication authentication, Model model) {
+    runtipiAppStoreSyncService.syncIfStale();
     UserAccount user = currentUserService.requireUser(authentication);
     model.addAttribute("pageTitle", "控制面板");
     model.addAttribute("activeNav", "dashboard");

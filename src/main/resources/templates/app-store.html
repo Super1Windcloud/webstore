@@ -3,6 +3,7 @@
 <head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
 <body>
 <header th:replace="~{fragments/layout :: topbar(${activeNav}, ${username})}"></header>
+<div th:replace="~{fragments/layout :: toast(${toastMessage}, ${toastType})}"></div>
 <main class="page-shell">
   <section class="page-header">
     <div>

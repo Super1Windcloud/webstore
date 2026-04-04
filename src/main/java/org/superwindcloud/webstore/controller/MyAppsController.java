@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.superwindcloud.webstore.domain.InstalledAppStatus;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.service.AppCatalogService;
@@ -30,6 +31,7 @@ public class MyAppsController {
 
   @GetMapping("/my-apps")
   public String myApps(Authentication authentication, Model model) {
+    runtipiAppStoreSyncService.syncIfStale();
     UserAccount user = currentUserService.requireUser(authentication);
     model.addAttribute("pageTitle", "我的App");
     model.addAttribute("activeNav", "my-apps");
@@ -50,36 +52,55 @@ public class MyAppsController {
   }
 
   @PostMapping("/my-apps/{slug}/start")
-  public String startApp(@PathVariable String slug, Authentication authentication) {
+  public String startApp(
+      @PathVariable String slug,
+      Authentication authentication,
+      RedirectAttributes redirectAttributes) {
     appCatalogService.updateStatus(
         currentUserService.requireUser(authentication), slug, InstalledAppStatus.RUNNING);
+    redirectAttributes.addFlashAttribute("toastType", "success");
+    redirectAttributes.addFlashAttribute("toastMessage", "应用已启动");
     return "redirect:/my-apps";
   }
 
   @PostMapping("/my-apps/{slug}/stop")
-  public String stopApp(@PathVariable String slug, Authentication authentication) {
+  public String stopApp(
+      @PathVariable String slug,
+      Authentication authentication,
+      RedirectAttributes redirectAttributes) {
     appCatalogService.updateStatus(
         currentUserService.requireUser(authentication), slug, InstalledAppStatus.STOPPED);
+    redirectAttributes.addFlashAttribute("toastType", "warning");
+    redirectAttributes.addFlashAttribute("toastMessage", "应用已停止");
     return "redirect:/my-apps";
   }
 
   @PostMapping("/my-apps/{slug}/uninstall")
-  public String uninstallApp(@PathVariable String slug, Authentication authentication) {
+  public String uninstallApp(
+      @PathVariable String slug,
+      Authentication authentication,
+      RedirectAttributes redirectAttributes) {
     appCatalogService.uninstallApp(currentUserService.requireUser(authentication), slug);
+    redirectAttributes.addFlashAttribute("toastType", "danger");
+    redirectAttributes.addFlashAttribute("toastMessage", "应用已卸载");
     return "redirect:/my-apps";
   }
 
   @PostMapping("/my-apps/start-all")
-  public String startAllApps(Authentication authentication) {
+  public String startAllApps(Authentication authentication, RedirectAttributes redirectAttributes) {
     appCatalogService.updateAllStatuses(
         currentUserService.requireUser(authentication), InstalledAppStatus.RUNNING);
+    redirectAttributes.addFlashAttribute("toastType", "success");
+    redirectAttributes.addFlashAttribute("toastMessage", "所有应用已启动");
     return "redirect:/my-apps";
   }
 
   @PostMapping("/my-apps/stop-all")
-  public String stopAllApps(Authentication authentication) {
+  public String stopAllApps(Authentication authentication, RedirectAttributes redirectAttributes) {
     appCatalogService.updateAllStatuses(
         currentUserService.requireUser(authentication), InstalledAppStatus.STOPPED);
+    redirectAttributes.addFlashAttribute("toastType", "warning");
+    redirectAttributes.addFlashAttribute("toastMessage", "所有应用已停止");
     return "redirect:/my-apps";
   }
 }
