@@ -1,5 +1,7 @@
 package org.superwindcloud.webstore.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -15,6 +17,8 @@ import org.superwindcloud.webstore.service.RuntipiAppStoreSyncService;
 
 @Controller
 public class AppStoreController {
+
+  private static final Logger log = LoggerFactory.getLogger(AppStoreController.class);
 
   private final CurrentUserService currentUserService;
   private final AppCatalogService appCatalogService;
@@ -59,9 +63,11 @@ public class AppStoreController {
     try {
       String output =
           appCatalogService.installApp(currentUserService.requireUser(authentication), slug);
+      logOperationResult("install", slug, output);
       redirectAttributes.addFlashAttribute("toastType", "success");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已安装并启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
+      log.warn("WebStore install failed for app '{}': {}", slug, ex.getMessage(), ex);
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/app-store";
@@ -74,5 +80,13 @@ public class AppStoreController {
       return message;
     }
     return message + "\n\n" + output;
+  }
+
+  private void logOperationResult(String action, String slug, String output) {
+    if (output == null || output.isBlank()) {
+      log.info("WebStore {} completed for app '{}' with no runtime output", action, slug);
+      return;
+    }
+    log.info("WebStore {} output for app '{}':\n{}", action, slug, output);
   }
 }

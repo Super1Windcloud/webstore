@@ -93,11 +93,22 @@ public class RemoteHttpAppRuntimeClient implements AppRuntimeClient {
               builder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
       RuntimeCommandResponse runtimeResponse = parseResponse(response.body());
       if (response.statusCode() >= 400) {
+        log.warn(
+            "Remote runtime request failed for app '{}' with status {} and body:\n{}",
+            appDefinition.getSlug(),
+            response.statusCode(),
+            response.body());
         throw new AppOperationException(
             buildErrorMessage(response.statusCode(), runtimeResponse, response.body()));
       }
       if (!response.body().isBlank()) {
         log.info("Remote runtime output: {}", response.body());
+      }
+      if (runtimeResponse != null && hasText(runtimeResponse.output())) {
+        log.info(
+            "Remote runtime parsed output for app '{}':\n{}",
+            appDefinition.getSlug(),
+            runtimeResponse.output());
       }
       return runtimeResponse == null ? null : runtimeResponse.output();
     } catch (IOException ex) {

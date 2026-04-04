@@ -47,7 +47,7 @@
        data-toast>
     <div class="toast-body">
       <strong th:text="${type == 'danger' ? '操作失败' : '操作完成'}">操作完成</strong>
-      <span th:text="${message}">操作已完成</span>
+      <div class="toast-message" th:text="${message}">操作已完成</div>
     </div>
     <button class="toast-close" type="button" data-toast-close>关闭</button>
   </div>

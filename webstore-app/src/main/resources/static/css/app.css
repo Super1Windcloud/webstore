@@ -98,8 +98,15 @@ body {
   gap: 4px;
 }
 
-.toast-body span {
+.toast-message {
   color: var(--muted);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 240px;
+  overflow: auto;
+  padding-right: 4px;
+  font-size: 0.94rem;
+  line-height: 1.45;
 }
 
 .toast-close {

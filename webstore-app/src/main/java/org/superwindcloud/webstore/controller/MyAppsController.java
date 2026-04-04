@@ -1,5 +1,7 @@
 package org.superwindcloud.webstore.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -16,6 +18,8 @@ import org.superwindcloud.webstore.service.RuntipiAppStoreSyncService;
 
 @Controller
 public class MyAppsController {
+
+  private static final Logger log = LoggerFactory.getLogger(MyAppsController.class);
 
   private final CurrentUserService currentUserService;
   private final AppCatalogService appCatalogService;
@@ -61,9 +65,11 @@ public class MyAppsController {
       String output =
           appCatalogService.updateStatus(
               currentUserService.requireUser(authentication), slug, InstalledAppStatus.RUNNING);
+      logOperationResult("start", slug, output);
       redirectAttributes.addFlashAttribute("toastType", "success");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
+      log.warn("WebStore start failed for app '{}': {}", slug, ex.getMessage(), ex);
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -80,9 +86,11 @@ public class MyAppsController {
       String output =
           appCatalogService.updateStatus(
               currentUserService.requireUser(authentication), slug, InstalledAppStatus.STOPPED);
+      logOperationResult("stop", slug, output);
       redirectAttributes.addFlashAttribute("toastType", "warning");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已停止", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
+      log.warn("WebStore stop failed for app '{}': {}", slug, ex.getMessage(), ex);
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -98,9 +106,11 @@ public class MyAppsController {
     try {
       String output =
           appCatalogService.uninstallApp(currentUserService.requireUser(authentication), slug);
+      logOperationResult("uninstall", slug, output);
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已卸载", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
+      log.warn("WebStore uninstall failed for app '{}': {}", slug, ex.getMessage(), ex);
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -114,9 +124,11 @@ public class MyAppsController {
       String output =
           appCatalogService.updateAllStatuses(
               currentUserService.requireUser(authentication), InstalledAppStatus.RUNNING);
+      logBulkOperationResult("start-all", output);
       redirectAttributes.addFlashAttribute("toastType", "success");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("所有应用已启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
+      log.warn("WebStore start-all failed: {}", ex.getMessage(), ex);
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -130,9 +142,11 @@ public class MyAppsController {
       String output =
           appCatalogService.updateAllStatuses(
               currentUserService.requireUser(authentication), InstalledAppStatus.STOPPED);
+      logBulkOperationResult("stop-all", output);
       redirectAttributes.addFlashAttribute("toastType", "warning");
       redirectAttributes.addFlashAttribute("toastMessage", successMessage("所有应用已停止", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
+      log.warn("WebStore stop-all failed: {}", ex.getMessage(), ex);
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
@@ -145,5 +159,21 @@ public class MyAppsController {
       return message;
     }
     return message + "\n\n" + output;
+  }
+
+  private void logOperationResult(String action, String slug, String output) {
+    if (output == null || output.isBlank()) {
+      log.info("WebStore {} completed for app '{}' with no runtime output", action, slug);
+      return;
+    }
+    log.info("WebStore {} output for app '{}':\n{}", action, slug, output);
+  }
+
+  private void logBulkOperationResult(String action, String output) {
+    if (output == null || output.isBlank()) {
+      log.info("WebStore {} completed with no runtime output", action);
+      return;
+    }
+    log.info("WebStore {} output:\n{}", action, output);
   }
 }
