@@ -48,8 +48,6 @@ services:
       - internal
 
   traefik:
-    profiles:
-      - proxy
     image: traefik:v3.4
     container_name: webstore-traefik
     restart: unless-stopped

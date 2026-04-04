@@ -91,15 +91,13 @@ The repository now includes a minimal platform stack for local container startup
 Start only the non-Spring backend services and run `webstore` locally:
 
 ```bash
-docker compose up -d postgres
-docker compose --profile proxy up -d traefik
+docker compose up -d
 ```
 
 On Windows:
 
 ```powershell
-docker compose up -d postgres
-docker compose --profile proxy up -d traefik
+docker compose up -d
 ```
 
 Then start the Spring Boot app locally with PostgreSQL from Docker:
@@ -123,13 +121,13 @@ In this mode:
 Start the full containerized stack when needed:
 
 ```bash
-docker compose --profile app --profile proxy up -d --build
+docker compose --profile app up -d --build
 ```
 
 On Windows:
 
 ```powershell
-docker compose --profile app --profile proxy up -d --build
+docker compose --profile app up -d --build
 ```
 
 Then open:
@@ -146,9 +144,8 @@ http://localhost:8081
 
 Notes:
 
-- `postgres` is the default infrastructure service and can be started independently.
+- `postgres` and `traefik` start by default with `docker compose up -d`.
 - `webstore` is under the `app` profile.
-- `traefik` is under the `proxy` profile.
 - The Traefik local-development route points to `http://host.docker.internal:8080`.
 - If port `80` is already in use, change the Traefik port mapping in `docker-compose.yml`.
 - The default PostgreSQL and JWT credentials in `docker-compose.yml` are for local development only.
