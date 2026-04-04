@@ -1,0 +1,20 @@
+services:
+  runtime-agent:
+    build:
+      context: ./runtime-agent
+      dockerfile: Dockerfile
+    container_name: webstore-runtime-agent
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      RUNTIME_AGENT_API_TOKEN: ${RUNTIME_AGENT_API_TOKEN:-change-me}
+      RUNTIME_AGENT_DOCKER_COMMAND: docker
+      RUNTIME_AGENT_MANAGED_NETWORK: ${RUNTIME_AGENT_MANAGED_NETWORK:-tipi_main_network}
+      RUNTIME_AGENT_LOCAL_APPS_PATH: /workspace/appstore/apps
+      RUNTIME_AGENT_LOCAL_DATA_PATH: /workspace/data/apps
+      RUNTIME_AGENT_LOCAL_DOMAIN: ${RUNTIME_AGENT_LOCAL_DOMAIN:-localhost}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./appstore:/workspace/appstore
+      - ./data:/workspace/data

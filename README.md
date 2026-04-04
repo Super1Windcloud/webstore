@@ -245,6 +245,36 @@ This project is inspired by the open-source self-hosting ecosystem, especially t
 - Runtipi repository: https://github.com/runtipi/runtipi
 - Runtipi app store: https://github.com/runtipi/runtipi-appstore
 
+## Runtime Agent
+
+The repository includes a standalone `runtime-agent` service under [runtime-agent/pom.xml](/A:/IDEA_Professional/IDEA_project/webstore/runtime-agent/pom.xml). It is designed to run on the Docker host, while the main `webstore` backend can be deployed separately.
+
+Build and run the agent on the Docker host:
+
+```bash
+docker compose -f docker-compose.runtime.yml up -d --build
+```
+
+The runtime agent exposes:
+
+```text
+http://localhost:9000/api/health
+```
+
+The agent container mounts:
+
+- `/var/run/docker.sock` to control the host Docker engine
+- `./appstore` so it can read `appstore/apps/{slug}/docker-compose.yml`
+- `./data` so app runtime data persists outside the container
+
+Point the main `webstore` backend at the agent:
+
+```dotenv
+webstore.runtime.mode=remote
+webstore.runtime.base-url=http://<runtime-agent-host>:9000
+webstore.runtime.api-token=<same token as RUNTIME_AGENT_API_TOKEN>
+```
+
 ## License
 
 Add a license file before public release. Until then, all rights remain reserved by the repository owner unless stated otherwise.
