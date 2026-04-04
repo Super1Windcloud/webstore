@@ -65,9 +65,13 @@
       </div>
       <div class="list-stack" th:if="${!#lists.isEmpty(recentApps)}">
         <article class="list-item" th:each="app : ${recentApps}">
-          <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">NC</div>
+          <a class="store-logo-wrap app-entry-link" th:href="@{/my-apps/{slug}(slug=${app.slug})}" th:style="'--accent:' + ${app.accentColor}">
+            <img class="store-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
+          </a>
           <div>
-            <strong th:text="${app.name}">App</strong>
+            <a class="app-title-link" th:href="@{/my-apps/{slug}(slug=${app.slug})}">
+              <strong th:text="${app.name}">App</strong>
+            </a>
             <p th:text="${app.description}">Description</p>
           </div>
           <span class="status-pill" th:text="${app.status}">RUNNING</span>

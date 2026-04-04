@@ -15,7 +15,18 @@
         <form th:if="${!app.installed}" th:action="@{/app-store/{slug}/install(slug=${app.slug})}" method="post">
           <button class="primary-button" type="submit">安装</button>
         </form>
-        <a class="secondary-button link-button" th:if="${app.installed}" th:href="@{/my-apps}">去管理</a>
+        <form th:if="${app.installed and app.status != null and app.status.name() == 'RUNNING'}"
+              th:action="@{/my-apps/{slug}/stop(slug=${app.slug})}" method="post">
+          <button class="secondary-button" type="submit">停止</button>
+        </form>
+        <form th:if="${app.installed and app.status != null and app.status.name() == 'STOPPED'}"
+              th:action="@{/my-apps/{slug}/start(slug=${app.slug})}" method="post">
+          <button class="primary-button" type="submit">启动</button>
+        </form>
+        <a class="ghost-button link-button" th:if="${app.installed}" th:href="${app.appHomeUrl}" target="_blank" rel="noreferrer">打开网页</a>
+        <form th:if="${app.installed}" th:action="@{/my-apps/{slug}/uninstall(slug=${app.slug})}" method="post">
+          <button class="danger-button" type="submit">卸载</button>
+        </form>
       </div>
     </div>
     <div class="detail-logo-panel" th:style="'--accent:' + ${app.accentColor}">
@@ -57,7 +68,7 @@
   <section class="panel"
            th:if="${app.metadataDescription != null and !#strings.isEmpty(app.metadataDescription)}">
     <div class="panel-head">
-      <h2>metadata/description.md</h2>
+      <h2>Description</h2>
     </div>
     <div class="markdown-block" th:utext="${app.metadataDescriptionHtml}">description</div>
   </section>

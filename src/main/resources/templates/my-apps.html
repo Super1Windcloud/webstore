@@ -10,16 +10,28 @@
       <h1>管理你已经安装的服务</h1>
       <p>当前版本支持安装、启动、停止和卸载的基础操作流。</p>
     </div>
+    <div class="header-actions" th:if="${!#lists.isEmpty(apps)}">
+      <form th:action="@{/my-apps/start-all}" method="post">
+        <button class="primary-button" type="submit">启动所有</button>
+      </form>
+      <form th:action="@{/my-apps/stop-all}" method="post">
+        <button class="secondary-button" type="submit">停止所有</button>
+      </form>
+    </div>
   </section>
 
   <section class="panel">
     <div class="list-stack" th:if="${!#lists.isEmpty(apps)}">
       <article class="app-row" th:each="app : ${apps}">
         <div class="app-row-main">
-          <div class="icon-badge" th:style="'--accent:' + ${app.accentColor}" th:text="${app.icon}">AP</div>
+          <a class="store-logo-wrap app-entry-link" th:href="@{/my-apps/{slug}(slug=${app.slug})}" th:style="'--accent:' + ${app.accentColor}">
+            <img class="store-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
+          </a>
           <div>
             <div class="app-row-title">
-              <strong th:text="${app.name}">App</strong>
+              <a class="app-title-link" th:href="@{/my-apps/{slug}(slug=${app.slug})}">
+                <strong th:text="${app.name}">App</strong>
+              </a>
               <span class="category-chip" th:text="${app.category}">Category</span>
             </div>
             <p th:text="${app.description}">Description</p>
@@ -34,6 +46,7 @@
           <form th:if="${app.status.name() == 'STOPPED'}" th:action="@{/my-apps/{slug}/start(slug=${app.slug})}" method="post">
             <button class="secondary-button" type="submit">启动</button>
           </form>
+          <a class="ghost-button link-button" th:href="${app.appHomeUrl}" target="_blank" rel="noreferrer">打开网页</a>
           <form th:action="@{/my-apps/{slug}/uninstall(slug=${app.slug})}" method="post">
             <button class="danger-button" type="submit">卸载</button>
           </form>

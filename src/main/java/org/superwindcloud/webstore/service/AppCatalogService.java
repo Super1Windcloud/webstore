@@ -65,6 +65,7 @@ public class AppCatalogService {
         detail.accentColor(),
         detail.icon(),
         detail.logoUrl(),
+        appHomeUrl(detail.slug(), detail.port()),
         detail.installed(),
         detail.status(),
         detail.version(),
@@ -87,9 +88,20 @@ public class AppCatalogService {
                     installedApp.getAppDefinition().getDescription(),
                     installedApp.getAppDefinition().getAccentColor(),
                     installedApp.getAppDefinition().getIcon(),
+                    logoUrlFor(installedApp.getAppDefinition().getSlug()),
+                    appHomeUrl(installedApp.getAppDefinition().getSlug(), null),
                     installedApp.getStatus(),
                     installedApp.getInstalledAt()))
         .toList();
+  }
+
+  @Transactional(readOnly = true)
+  public AppStoreDetail getInstalledAppDetail(UserAccount user, String slug) {
+    AppStoreDetail detail = getLiveStoreDetail(user, slug);
+    if (!detail.installed()) {
+      throw new IllegalArgumentException("App is not installed");
+    }
+    return detail;
   }
 
   @Transactional(readOnly = true)
@@ -132,6 +144,13 @@ public class AppCatalogService {
     installedApp.setStatus(status);
   }
 
+  @Transactional
+  public void updateAllStatuses(UserAccount user, InstalledAppStatus status) {
+    installedAppRepository
+        .findAllByUserOrderByInstalledAtDesc(user)
+        .forEach(app -> app.setStatus(status));
+  }
+
   private List<AppStoreCard> mapStoreCards(
       List<AppDefinition> appDefinitions, Map<String, InstalledAppStatus> installedStatusBySlug) {
     return appDefinitions.stream()
@@ -168,6 +187,13 @@ public class AppCatalogService {
 
   private String logoUrlFor(String slug) {
     return appStoreProperties.rawBaseUrl() + "/" + slug + "/metadata/logo.jpg";
+  }
+
+  private String appHomeUrl(String slug, String port) {
+    if (port != null && !"Unknown".equalsIgnoreCase(port)) {
+      return "http://localhost:" + port;
+    }
+    return "http://localhost/" + slug;
   }
 
   private AppDefinition getAppDefinition(String slug) {

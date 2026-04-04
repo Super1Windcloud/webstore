@@ -14,6 +14,7 @@ public record AppStoreDetail(
     String accentColor,
     String icon,
     String logoUrl,
+    String appHomeUrl,
     boolean installed,
     InstalledAppStatus status,
     String version,

@@ -86,7 +86,9 @@ input {
 .topbar-actions,
 .nav,
 .list-item,
-.app-row-title {
+.app-row-title,
+.page-header,
+.header-actions {
   display: flex;
   align-items: center;
 }
@@ -94,7 +96,8 @@ input {
 .brand,
 .topbar-actions,
 .nav,
-.app-row-title {
+.app-row-title,
+.header-actions {
   gap: 12px;
 }
 
@@ -358,6 +361,10 @@ small,
 }
 
 .page-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: end;
   margin-bottom: 24px;
 }
 
@@ -408,6 +415,20 @@ small,
 
 .app-row-actions {
   justify-content: flex-end;
+}
+
+.app-entry-link {
+  overflow: hidden;
+}
+
+.app-title-link {
+  color: inherit;
+}
+
+.app-title-link:hover strong,
+.app-entry-link:hover,
+.store-card-link:hover h2 {
+  opacity: 0.9;
 }
 
 .settings-list {
@@ -553,7 +574,8 @@ small,
   .auth-page,
   .hero-panel,
   .content-grid,
-  .store-search-panel {
+  .store-search-panel,
+  .page-header {
     grid-template-columns: 1fr;
   }
 
@@ -561,7 +583,8 @@ small,
     display: grid;
   }
 
-  .store-search-panel {
+  .store-search-panel,
+  .page-header {
     display: grid;
     align-items: stretch;
   }

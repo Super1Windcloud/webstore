@@ -10,17 +10,22 @@ import org.superwindcloud.webstore.domain.InstalledAppStatus;
 import org.superwindcloud.webstore.domain.UserAccount;
 import org.superwindcloud.webstore.service.AppCatalogService;
 import org.superwindcloud.webstore.service.CurrentUserService;
+import org.superwindcloud.webstore.service.RuntipiAppStoreSyncService;
 
 @Controller
 public class MyAppsController {
 
   private final CurrentUserService currentUserService;
   private final AppCatalogService appCatalogService;
+  private final RuntipiAppStoreSyncService runtipiAppStoreSyncService;
 
   public MyAppsController(
-      CurrentUserService currentUserService, AppCatalogService appCatalogService) {
+      CurrentUserService currentUserService,
+      AppCatalogService appCatalogService,
+      RuntipiAppStoreSyncService runtipiAppStoreSyncService) {
     this.currentUserService = currentUserService;
     this.appCatalogService = appCatalogService;
+    this.runtipiAppStoreSyncService = runtipiAppStoreSyncService;
   }
 
   @GetMapping("/my-apps")
@@ -31,6 +36,17 @@ public class MyAppsController {
     model.addAttribute("username", user.getUsername());
     model.addAttribute("apps", appCatalogService.getInstalledApps(user));
     return "my-apps";
+  }
+
+  @GetMapping("/my-apps/{slug}")
+  public String appDetail(@PathVariable String slug, Authentication authentication, Model model) {
+    runtipiAppStoreSyncService.syncIfStale();
+    UserAccount user = currentUserService.requireUser(authentication);
+    model.addAttribute("pageTitle", "App 详情");
+    model.addAttribute("activeNav", "my-apps");
+    model.addAttribute("username", user.getUsername());
+    model.addAttribute("app", appCatalogService.getInstalledAppDetail(user, slug));
+    return "app-detail";
   }
 
   @PostMapping("/my-apps/{slug}/start")
@@ -50,6 +66,20 @@ public class MyAppsController {
   @PostMapping("/my-apps/{slug}/uninstall")
   public String uninstallApp(@PathVariable String slug, Authentication authentication) {
     appCatalogService.uninstallApp(currentUserService.requireUser(authentication), slug);
+    return "redirect:/my-apps";
+  }
+
+  @PostMapping("/my-apps/start-all")
+  public String startAllApps(Authentication authentication) {
+    appCatalogService.updateAllStatuses(
+        currentUserService.requireUser(authentication), InstalledAppStatus.RUNNING);
+    return "redirect:/my-apps";
+  }
+
+  @PostMapping("/my-apps/stop-all")
+  public String stopAllApps(Authentication authentication) {
+    appCatalogService.updateAllStatuses(
+        currentUserService.requireUser(authentication), InstalledAppStatus.STOPPED);
     return "redirect:/my-apps";
   }
 }

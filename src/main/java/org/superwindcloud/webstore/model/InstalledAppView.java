@@ -10,5 +10,7 @@ public record InstalledAppView(
     String description,
     String accentColor,
     String icon,
+    String logoUrl,
+    String appHomeUrl,
     InstalledAppStatus status,
     Instant installedAt) {}
