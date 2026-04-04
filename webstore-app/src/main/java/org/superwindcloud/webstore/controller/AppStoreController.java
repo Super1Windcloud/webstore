@@ -57,14 +57,22 @@ public class AppStoreController {
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
     try {
-      appCatalogService.installApp(currentUserService.requireUser(authentication), slug);
+      String output =
+          appCatalogService.installApp(currentUserService.requireUser(authentication), slug);
+      redirectAttributes.addFlashAttribute("toastType", "success");
+      redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已安装并启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/app-store";
     }
-    redirectAttributes.addFlashAttribute("toastType", "success");
-    redirectAttributes.addFlashAttribute("toastMessage", "应用已安装并启动");
     return "redirect:/app-store";
+  }
+
+  private String successMessage(String message, String output) {
+    if (output == null || output.isBlank()) {
+      return message;
+    }
+    return message + "\n\n" + output;
   }
 }

@@ -1,5 +1,6 @@
 package org.superwindcloud.webstore.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
@@ -125,9 +126,9 @@ public class AppCatalogService {
   }
 
   @Transactional
-  public void installApp(UserAccount user, String slug) {
+  public String installApp(UserAccount user, String slug) {
     AppDefinition appDefinition = getRuntimeAppDefinition(slug);
-    appRuntimeService.install(appDefinition);
+    String output = appRuntimeService.install(appDefinition);
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
         .orElseGet(
@@ -136,12 +137,13 @@ public class AppCatalogService {
               return installedAppRepository.save(
                   new InstalledApp(user, appDefinition, InstalledAppStatus.RUNNING));
             });
+    return output;
   }
 
   @Transactional
-  public void uninstallApp(UserAccount user, String slug) {
+  public String uninstallApp(UserAccount user, String slug) {
     AppDefinition appDefinition = getRuntimeAppDefinition(slug);
-    appRuntimeService.uninstall(appDefinition);
+    String output = appRuntimeService.uninstall(appDefinition);
     installedAppRepository
         .findByUserAndAppDefinition(user, appDefinition)
         .ifPresent(
@@ -149,42 +151,53 @@ public class AppCatalogService {
               log.info("Uninstalling app '{}' for user '{}'", slug, user.getUsername());
               installedAppRepository.delete(installedApp);
             });
+    return output;
   }
 
   @Transactional
-  public void updateStatus(UserAccount user, String slug, InstalledAppStatus status) {
+  public String updateStatus(UserAccount user, String slug, InstalledAppStatus status) {
     AppDefinition appDefinition = getRuntimeAppDefinition(slug);
     InstalledApp installedApp =
         installedAppRepository
             .findByUserAndAppDefinition(user, appDefinition)
             .orElseThrow(() -> new IllegalArgumentException("App is not installed"));
+    String output = null;
     if (status == InstalledAppStatus.RUNNING) {
-      appRuntimeService.start(appDefinition);
+      output = appRuntimeService.start(appDefinition);
     }
     if (status == InstalledAppStatus.STOPPED) {
-      appRuntimeService.stop(appDefinition);
+      output = appRuntimeService.stop(appDefinition);
     }
     log.info("Updating app '{}' for user '{}' to status '{}'", slug, user.getUsername(), status);
     installedApp.setStatus(status);
+    return output;
   }
 
   @Transactional
-  public void updateAllStatuses(UserAccount user, InstalledAppStatus status) {
+  public String updateAllStatuses(UserAccount user, InstalledAppStatus status) {
     log.info(
         "Updating all installed apps for user '{}' to status '{}'", user.getUsername(), status);
+    List<String> outputs = new ArrayList<>();
     installedAppRepository
         .findAllByUserOrderByInstalledAtDesc(user)
         .forEach(
             app -> {
               AppDefinition appDefinition = prepareRuntimeAppDefinition(app.getAppDefinition());
               if (status == InstalledAppStatus.RUNNING) {
-                appRuntimeService.start(appDefinition);
+                String output = appRuntimeService.start(appDefinition);
+                if (output != null && !output.isBlank()) {
+                  outputs.add(app.getAppDefinition().getSlug() + ":\n" + output);
+                }
               }
               if (status == InstalledAppStatus.STOPPED) {
-                appRuntimeService.stop(appDefinition);
+                String output = appRuntimeService.stop(appDefinition);
+                if (output != null && !output.isBlank()) {
+                  outputs.add(app.getAppDefinition().getSlug() + ":\n" + output);
+                }
               }
               app.setStatus(status);
             });
+    return String.join("\n\n", outputs);
   }
 
   private List<AppStoreCard> mapStoreCards(

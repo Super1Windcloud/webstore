@@ -58,15 +58,16 @@ public class MyAppsController {
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
     try {
-      appCatalogService.updateStatus(
-          currentUserService.requireUser(authentication), slug, InstalledAppStatus.RUNNING);
+      String output =
+          appCatalogService.updateStatus(
+              currentUserService.requireUser(authentication), slug, InstalledAppStatus.RUNNING);
+      redirectAttributes.addFlashAttribute("toastType", "success");
+      redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
     }
-    redirectAttributes.addFlashAttribute("toastType", "success");
-    redirectAttributes.addFlashAttribute("toastMessage", "应用已启动");
     return "redirect:/my-apps";
   }
 
@@ -76,15 +77,16 @@ public class MyAppsController {
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
     try {
-      appCatalogService.updateStatus(
-          currentUserService.requireUser(authentication), slug, InstalledAppStatus.STOPPED);
+      String output =
+          appCatalogService.updateStatus(
+              currentUserService.requireUser(authentication), slug, InstalledAppStatus.STOPPED);
+      redirectAttributes.addFlashAttribute("toastType", "warning");
+      redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已停止", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
     }
-    redirectAttributes.addFlashAttribute("toastType", "warning");
-    redirectAttributes.addFlashAttribute("toastMessage", "应用已停止");
     return "redirect:/my-apps";
   }
 
@@ -94,44 +96,54 @@ public class MyAppsController {
       Authentication authentication,
       RedirectAttributes redirectAttributes) {
     try {
-      appCatalogService.uninstallApp(currentUserService.requireUser(authentication), slug);
+      String output =
+          appCatalogService.uninstallApp(currentUserService.requireUser(authentication), slug);
+      redirectAttributes.addFlashAttribute("toastType", "danger");
+      redirectAttributes.addFlashAttribute("toastMessage", successMessage("应用已卸载", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
     }
-    redirectAttributes.addFlashAttribute("toastType", "danger");
-    redirectAttributes.addFlashAttribute("toastMessage", "应用已卸载");
     return "redirect:/my-apps";
   }
 
   @PostMapping("/my-apps/start-all")
   public String startAllApps(Authentication authentication, RedirectAttributes redirectAttributes) {
     try {
-      appCatalogService.updateAllStatuses(
-          currentUserService.requireUser(authentication), InstalledAppStatus.RUNNING);
+      String output =
+          appCatalogService.updateAllStatuses(
+              currentUserService.requireUser(authentication), InstalledAppStatus.RUNNING);
+      redirectAttributes.addFlashAttribute("toastType", "success");
+      redirectAttributes.addFlashAttribute("toastMessage", successMessage("所有应用已启动", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
     }
-    redirectAttributes.addFlashAttribute("toastType", "success");
-    redirectAttributes.addFlashAttribute("toastMessage", "所有应用已启动");
     return "redirect:/my-apps";
   }
 
   @PostMapping("/my-apps/stop-all")
   public String stopAllApps(Authentication authentication, RedirectAttributes redirectAttributes) {
     try {
-      appCatalogService.updateAllStatuses(
-          currentUserService.requireUser(authentication), InstalledAppStatus.STOPPED);
+      String output =
+          appCatalogService.updateAllStatuses(
+              currentUserService.requireUser(authentication), InstalledAppStatus.STOPPED);
+      redirectAttributes.addFlashAttribute("toastType", "warning");
+      redirectAttributes.addFlashAttribute("toastMessage", successMessage("所有应用已停止", output));
     } catch (AppOperationException | IllegalArgumentException ex) {
       redirectAttributes.addFlashAttribute("toastType", "danger");
       redirectAttributes.addFlashAttribute("toastMessage", ex.getMessage());
       return "redirect:/my-apps";
     }
-    redirectAttributes.addFlashAttribute("toastType", "warning");
-    redirectAttributes.addFlashAttribute("toastMessage", "所有应用已停止");
     return "redirect:/my-apps";
+  }
+
+  private String successMessage(String message, String output) {
+    if (output == null || output.isBlank()) {
+      return message;
+    }
+    return message + "\n\n" + output;
   }
 }

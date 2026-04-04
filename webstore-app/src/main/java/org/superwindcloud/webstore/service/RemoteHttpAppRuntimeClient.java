@@ -36,26 +36,26 @@ public class RemoteHttpAppRuntimeClient implements AppRuntimeClient {
   }
 
   @Override
-  public void install(AppDefinition appDefinition) {
-    execute(appDefinition, "install", "POST");
+  public String install(AppDefinition appDefinition) {
+    return execute(appDefinition, "install", "POST");
   }
 
   @Override
-  public void start(AppDefinition appDefinition) {
-    execute(appDefinition, "start", "POST");
+  public String start(AppDefinition appDefinition) {
+    return execute(appDefinition, "start", "POST");
   }
 
   @Override
-  public void stop(AppDefinition appDefinition) {
-    execute(appDefinition, "stop", "POST");
+  public String stop(AppDefinition appDefinition) {
+    return execute(appDefinition, "stop", "POST");
   }
 
   @Override
-  public void uninstall(AppDefinition appDefinition) {
-    execute(appDefinition, "", "DELETE");
+  public String uninstall(AppDefinition appDefinition) {
+    return execute(appDefinition, "", "DELETE");
   }
 
-  private void execute(AppDefinition appDefinition, String action, String method) {
+  private String execute(AppDefinition appDefinition, String action, String method) {
     String slug = encodedSlug(appDefinition.getSlug());
     String path = action.isBlank() ? "/api/apps/" + slug : "/api/apps/" + slug + "/" + action;
     URI uri = URI.create(normalizedBaseUrl() + path);
@@ -91,13 +91,15 @@ public class RemoteHttpAppRuntimeClient implements AppRuntimeClient {
       HttpResponse<String> response =
           httpClient.send(
               builder.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+      RuntimeCommandResponse runtimeResponse = parseResponse(response.body());
       if (response.statusCode() >= 400) {
         throw new AppOperationException(
-            "远程运行时调用失败，status=" + response.statusCode() + "，输出：" + response.body());
+            buildErrorMessage(response.statusCode(), runtimeResponse, response.body()));
       }
       if (!response.body().isBlank()) {
         log.info("Remote runtime output: {}", response.body());
       }
+      return runtimeResponse == null ? null : runtimeResponse.output();
     } catch (IOException ex) {
       throw new AppOperationException("无法连接远程运行时服务: " + uri, ex);
     } catch (InterruptedException ex) {
@@ -147,5 +149,91 @@ public class RemoteHttpAppRuntimeClient implements AppRuntimeClient {
         + "\"";
   }
 
+  private RuntimeCommandResponse parseResponse(String responseBody) {
+    if (!hasText(responseBody)) {
+      return null;
+    }
+    String status = extractJsonString(responseBody, "status");
+    String message = extractJsonString(responseBody, "message");
+    String output = extractJsonString(responseBody, "output");
+    if (status == null && message == null && output == null) {
+      log.warn("Failed to parse remote runtime response body as JSON: {}", responseBody);
+      return null;
+    }
+    return new RuntimeCommandResponse(status, message, output);
+  }
+
+  private String buildErrorMessage(
+      int statusCode, RuntimeCommandResponse runtimeResponse, String responseBody) {
+    if (runtimeResponse != null) {
+      StringBuilder builder =
+          new StringBuilder("远程运行时调用失败，status=")
+              .append(statusCode)
+              .append("，消息：")
+              .append(runtimeResponse.message());
+      if (hasText(runtimeResponse.output())) {
+        builder.append("\n\n").append(runtimeResponse.output());
+      }
+      return builder.toString();
+    }
+    return "远程运行时调用失败，status=" + statusCode + "，输出：" + responseBody;
+  }
+
+  private boolean hasText(String value) {
+    return value != null && !value.isBlank();
+  }
+
+  private String extractJsonString(String json, String fieldName) {
+    String marker = "\"" + fieldName + "\":";
+    int start = json.indexOf(marker);
+    if (start < 0) {
+      return null;
+    }
+    int valueStart = start + marker.length();
+    while (valueStart < json.length() && Character.isWhitespace(json.charAt(valueStart))) {
+      valueStart++;
+    }
+    if (valueStart + 4 <= json.length()
+        && "null".equals(json.substring(valueStart, valueStart + 4))) {
+      return null;
+    }
+    if (valueStart >= json.length() || json.charAt(valueStart) != '"') {
+      return null;
+    }
+
+    StringBuilder builder = new StringBuilder();
+    boolean escaping = false;
+    for (int i = valueStart + 1; i < json.length(); i++) {
+      char current = json.charAt(i);
+      if (escaping) {
+        builder.append(unescapeJsonChar(current));
+        escaping = false;
+        continue;
+      }
+      if (current == '\\') {
+        escaping = true;
+        continue;
+      }
+      if (current == '"') {
+        return builder.toString();
+      }
+      builder.append(current);
+    }
+    return null;
+  }
+
+  private char unescapeJsonChar(char current) {
+    return switch (current) {
+      case 'n' -> '\n';
+      case 'r' -> '\r';
+      case 't' -> '\t';
+      case '"' -> '"';
+      case '\\' -> '\\';
+      default -> current;
+    };
+  }
+
   private record RuntimeCommandRequest(String port, String appDomain, String localDomain) {}
+
+  private record RuntimeCommandResponse(String status, String message, String output) {}
 }

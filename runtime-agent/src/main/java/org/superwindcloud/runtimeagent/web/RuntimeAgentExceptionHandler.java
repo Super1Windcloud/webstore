@@ -6,15 +6,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.superwindcloud.runtimeagent.dto.RuntimeCommandResponse;
 import org.superwindcloud.runtimeagent.exception.RuntimeOperationException;
 
 @RestControllerAdvice
 public class RuntimeAgentExceptionHandler {
 
   @ExceptionHandler(RuntimeOperationException.class)
-  public ResponseEntity<Map<String, String>> handleRuntime(RuntimeOperationException ex) {
+  public ResponseEntity<RuntimeCommandResponse> handleRuntime(RuntimeOperationException ex) {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-        .body(Map.of("status", "error", "message", ex.getMessage()));
+        .body(new RuntimeCommandResponse("error", ex.getMessage(), ex.getOutput()));
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)

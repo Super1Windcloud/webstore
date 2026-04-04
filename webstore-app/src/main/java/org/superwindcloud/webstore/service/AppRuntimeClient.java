@@ -4,11 +4,11 @@ import org.superwindcloud.webstore.domain.AppDefinition;
 
 public interface AppRuntimeClient {
 
-  void install(AppDefinition appDefinition);
+  String install(AppDefinition appDefinition);
 
-  void start(AppDefinition appDefinition);
+  String start(AppDefinition appDefinition);
 
-  void stop(AppDefinition appDefinition);
+  String stop(AppDefinition appDefinition);
 
-  void uninstall(AppDefinition appDefinition);
+  String uninstall(AppDefinition appDefinition);
 }

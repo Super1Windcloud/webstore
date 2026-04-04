@@ -21,20 +21,20 @@ public class AppRuntimeService {
     this.remoteHttpAppRuntimeClient = remoteHttpAppRuntimeClient;
   }
 
-  public void install(AppDefinition appDefinition) {
-    currentClient().install(appDefinition);
+  public String install(AppDefinition appDefinition) {
+    return currentClient().install(appDefinition);
   }
 
-  public void start(AppDefinition appDefinition) {
-    currentClient().start(appDefinition);
+  public String start(AppDefinition appDefinition) {
+    return currentClient().start(appDefinition);
   }
 
-  public void stop(AppDefinition appDefinition) {
-    currentClient().stop(appDefinition);
+  public String stop(AppDefinition appDefinition) {
+    return currentClient().stop(appDefinition);
   }
 
-  public void uninstall(AppDefinition appDefinition) {
-    currentClient().uninstall(appDefinition);
+  public String uninstall(AppDefinition appDefinition) {
+    return currentClient().uninstall(appDefinition);
   }
 
   private AppRuntimeClient currentClient() {

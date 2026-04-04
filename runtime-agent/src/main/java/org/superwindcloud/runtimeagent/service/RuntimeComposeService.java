@@ -26,22 +26,22 @@ public class RuntimeComposeService {
     this.runtimeAgentProperties = runtimeAgentProperties;
   }
 
-  public void install(String slug, RuntimeCommandRequest request) {
+  public ProcessResult install(String slug, RuntimeCommandRequest request) {
     ensureManagedNetwork();
-    runCompose(slug, request, List.of("up", "-d"));
+    return runCompose(slug, request, List.of("up", "-d"));
   }
 
-  public void start(String slug, RuntimeCommandRequest request) {
+  public ProcessResult start(String slug, RuntimeCommandRequest request) {
     ensureManagedNetwork();
-    runCompose(slug, request, List.of("up", "-d"));
+    return runCompose(slug, request, List.of("up", "-d"));
   }
 
-  public void stop(String slug, RuntimeCommandRequest request) {
-    runCompose(slug, request, List.of("stop"));
+  public ProcessResult stop(String slug, RuntimeCommandRequest request) {
+    return runCompose(slug, request, List.of("stop"));
   }
 
-  public void uninstall(String slug, RuntimeCommandRequest request) {
-    runCompose(slug, request, List.of("down", "--remove-orphans"));
+  public ProcessResult uninstall(String slug, RuntimeCommandRequest request) {
+    return runCompose(slug, request, List.of("down", "--remove-orphans"));
   }
 
   private void ensureManagedNetwork() {
@@ -73,7 +73,7 @@ public class RuntimeComposeService {
     }
   }
 
-  private void runCompose(String slug, RuntimeCommandRequest request, List<String> args) {
+  private ProcessResult runCompose(String slug, RuntimeCommandRequest request, List<String> args) {
     Path composeFile = Path.of(runtimeAgentProperties.localAppsPath(), slug, "docker-compose.yml");
     if (!Files.exists(composeFile)) {
       throw new RuntimeOperationException("未找到应用的 docker-compose.yml: " + composeFile);
@@ -107,6 +107,7 @@ public class RuntimeComposeService {
     if (result.exitCode() != 0) {
       throw operationFailed("Docker Compose 执行失败", result);
     }
+    return result;
   }
 
   private String normalizedPort(String slug, RuntimeCommandRequest request) {
@@ -167,8 +168,8 @@ public class RuntimeComposeService {
   private RuntimeOperationException operationFailed(String message, ProcessResult result) {
     String detail = result.output().isBlank() ? "无输出" : result.output();
     return new RuntimeOperationException(
-        message + "，exitCode=" + result.exitCode() + "，输出：" + detail);
+        message + "，exitCode=" + result.exitCode() + "，输出：" + detail, result.output());
   }
 
-  private record ProcessResult(int exitCode, String output) {}
+  public record ProcessResult(int exitCode, String output) {}
 }

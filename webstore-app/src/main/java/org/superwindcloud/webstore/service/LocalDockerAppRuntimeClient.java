@@ -26,25 +26,25 @@ public class LocalDockerAppRuntimeClient implements AppRuntimeClient {
   }
 
   @Override
-  public void install(AppDefinition appDefinition) {
+  public String install(AppDefinition appDefinition) {
     ensureManagedNetwork();
-    runCompose(appDefinition, List.of("up", "-d"));
+    return runCompose(appDefinition, List.of("up", "-d"));
   }
 
   @Override
-  public void start(AppDefinition appDefinition) {
+  public String start(AppDefinition appDefinition) {
     ensureManagedNetwork();
-    runCompose(appDefinition, List.of("up", "-d"));
+    return runCompose(appDefinition, List.of("up", "-d"));
   }
 
   @Override
-  public void stop(AppDefinition appDefinition) {
-    runCompose(appDefinition, List.of("stop"));
+  public String stop(AppDefinition appDefinition) {
+    return runCompose(appDefinition, List.of("stop"));
   }
 
   @Override
-  public void uninstall(AppDefinition appDefinition) {
-    runCompose(appDefinition, List.of("down", "--remove-orphans"));
+  public String uninstall(AppDefinition appDefinition) {
+    return runCompose(appDefinition, List.of("down", "--remove-orphans"));
   }
 
   private void ensureManagedNetwork() {
@@ -65,7 +65,7 @@ public class LocalDockerAppRuntimeClient implements AppRuntimeClient {
     }
   }
 
-  private void runCompose(AppDefinition appDefinition, List<String> args) {
+  private String runCompose(AppDefinition appDefinition, List<String> args) {
     Path composeFile =
         Path.of(appStoreProperties.localAppsPath(), appDefinition.getSlug(), "docker-compose.yml");
     if (!Files.exists(composeFile)) {
@@ -103,6 +103,7 @@ public class LocalDockerAppRuntimeClient implements AppRuntimeClient {
     if (result.exitCode() != 0) {
       throw operationFailed("Docker Compose 执行失败", result);
     }
+    return result.output();
   }
 
   private String normalizedPort(AppDefinition appDefinition) {
