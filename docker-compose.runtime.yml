@@ -10,7 +10,7 @@ services:
     environment:
       RUNTIME_AGENT_API_TOKEN: ${RUNTIME_AGENT_API_TOKEN:-change-me}
       RUNTIME_AGENT_DOCKER_COMMAND: docker
-      RUNTIME_AGENT_MANAGED_NETWORK: ${RUNTIME_AGENT_MANAGED_NETWORK:-tipi_main_network}
+      RUNTIME_AGENT_MANAGED_NETWORK: ${RUNTIME_AGENT_MANAGED_NETWORK:-runtipi_tipi_main_network}
       RUNTIME_AGENT_LOCAL_APPS_PATH: /workspace/appstore/apps
       RUNTIME_AGENT_LOCAL_DATA_PATH: /workspace/data/apps
       RUNTIME_AGENT_LOCAL_DOMAIN: ${RUNTIME_AGENT_LOCAL_DOMAIN:-localhost}
