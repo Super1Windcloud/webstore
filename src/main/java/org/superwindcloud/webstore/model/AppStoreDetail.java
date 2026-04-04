@@ -9,6 +9,8 @@ public record AppStoreDetail(
     String category,
     String description,
     String longDescription,
+    String metadataDescription,
+    String metadataDescriptionHtml,
     String accentColor,
     String icon,
     String logoUrl,

@@ -25,16 +25,19 @@ public class AppCatalogService {
   private final InstalledAppRepository installedAppRepository;
   private final AppStoreProperties appStoreProperties;
   private final RuntipiAppStoreSyncService runtipiAppStoreSyncService;
+  private final MarkdownRendererService markdownRendererService;
 
   public AppCatalogService(
       AppDefinitionRepository appDefinitionRepository,
       InstalledAppRepository installedAppRepository,
       AppStoreProperties appStoreProperties,
-      RuntipiAppStoreSyncService runtipiAppStoreSyncService) {
+      RuntipiAppStoreSyncService runtipiAppStoreSyncService,
+      MarkdownRendererService markdownRendererService) {
     this.appDefinitionRepository = appDefinitionRepository;
     this.installedAppRepository = installedAppRepository;
     this.appStoreProperties = appStoreProperties;
     this.runtipiAppStoreSyncService = runtipiAppStoreSyncService;
+    this.markdownRendererService = markdownRendererService;
   }
 
   @Transactional(readOnly = true)
@@ -49,7 +52,27 @@ public class AppCatalogService {
 
   @Transactional(readOnly = true)
   public AppStoreDetail getLiveStoreDetail(UserAccount user, String slug) {
-    return runtipiAppStoreSyncService.fetchLiveStoreDetail(slug, installedAppStatusBySlug(user));
+    AppStoreDetail detail =
+        runtipiAppStoreSyncService.fetchLiveStoreDetail(slug, installedAppStatusBySlug(user));
+    return new AppStoreDetail(
+        detail.slug(),
+        detail.name(),
+        detail.category(),
+        detail.description(),
+        detail.longDescription(),
+        detail.metadataDescription(),
+        markdownRendererService.render(detail.metadataDescription()),
+        detail.accentColor(),
+        detail.icon(),
+        detail.logoUrl(),
+        detail.installed(),
+        detail.status(),
+        detail.version(),
+        detail.author(),
+        detail.sourceUrl(),
+        detail.port(),
+        detail.tipiVersion(),
+        detail.architectures());
   }
 
   @Transactional(readOnly = true)

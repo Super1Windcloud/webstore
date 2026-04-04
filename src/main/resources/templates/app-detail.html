@@ -53,6 +53,14 @@
       </div>
     </div>
   </section>
+
+  <section class="panel"
+           th:if="${app.metadataDescription != null and !#strings.isEmpty(app.metadataDescription)}">
+    <div class="panel-head">
+      <h2>metadata/description.md</h2>
+    </div>
+    <div class="markdown-block" th:utext="${app.metadataDescriptionHtml}">description</div>
+  </section>
 </main>
 </body>
 </html>

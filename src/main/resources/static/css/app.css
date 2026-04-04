@@ -486,6 +486,62 @@ small,
   border-radius: 18px;
 }
 
+.markdown-block {
+  margin: 0;
+  padding: 20px;
+  border-radius: 20px;
+  border: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface) 80%, transparent);
+  color: var(--text);
+  font: 500 0.96rem/1.7 "IBM Plex Sans", sans-serif;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.markdown-block > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-block > *:last-child {
+  margin-bottom: 0;
+}
+
+.markdown-block p,
+.markdown-block ul,
+.markdown-block ol,
+.markdown-block pre,
+.markdown-block blockquote {
+  margin: 0 0 16px;
+}
+
+.markdown-block ul,
+.markdown-block ol {
+  padding-left: 20px;
+}
+
+.markdown-block a {
+  color: var(--primary);
+}
+
+.markdown-block code {
+  padding: 2px 6px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface-strong) 82%, transparent);
+  font-family: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+.markdown-block pre {
+  overflow-x: auto;
+  padding: 16px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface-strong) 90%, black 10%);
+}
+
+.markdown-block pre code {
+  padding: 0;
+  background: transparent;
+}
+
 .link-button {
   display: inline-flex;
   align-items: center;
