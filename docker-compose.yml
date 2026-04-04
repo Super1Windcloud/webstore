@@ -57,7 +57,6 @@ services:
       - "8088:80"
       - "8081:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic:/etc/traefik/dynamic:ro
     networks:

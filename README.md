@@ -147,6 +147,7 @@ Notes:
 - `postgres` and `traefik` start by default with `docker compose up -d`.
 - `webstore` is under the `app` profile.
 - The Traefik local-development route points to `http://host.docker.internal:8080`.
+- In local development mode, Traefik uses only the file provider and does not depend on the Docker socket.
 - Traefik is mapped to host port `8088` by default to avoid conflicts on port `80`.
 - The default PostgreSQL and JWT credentials in `docker-compose.yml` are for local development only.
 - Local PostgreSQL data is stored in `./docker-data/postgres`.
