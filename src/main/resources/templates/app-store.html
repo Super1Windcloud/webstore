@@ -12,8 +12,22 @@
     </div>
   </section>
 
-  <section class="store-grid">
-    <article class="store-card" th:each="app : ${apps}">
+  <section class="panel store-search-panel">
+    <label class="store-search-field" for="app-store-search">
+      <span>搜索应用</span>
+      <input id="app-store-search" type="search" placeholder="按名称、分类或描述筛选" data-app-store-search>
+    </label>
+    <p class="muted store-search-meta">
+      共 <span th:text="${#lists.size(apps)}">0</span> 个应用，
+      当前显示 <span data-app-store-visible-count th:text="${#lists.size(apps)}">0</span> 个
+    </p>
+  </section>
+
+  <section class="store-grid" data-app-store-grid>
+    <article
+        class="store-card"
+        th:each="app : ${apps}"
+        th:attr="data-search-text=${#strings.toLowerCase(app.name + ' ' + app.category + ' ' + app.description)}">
       <div class="store-card-top">
         <div class="store-logo-wrap" th:style="'--accent:' + ${app.accentColor}">
           <img class="store-logo" th:src="${app.logoUrl}" th:alt="${app.name + ' logo'}">
@@ -33,6 +47,10 @@
       </div>
     </article>
   </section>
+
+  <div class="empty-state" data-app-store-empty hidden>
+    没有匹配的应用，换个关键词再试。
+  </div>
 </main>
 </body>
 </html>
