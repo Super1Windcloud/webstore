@@ -65,13 +65,7 @@ public class AuthController {
     }
 
     try {
-      Authentication authentication =
-          authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(
-                  loginForm.getUsername().trim(), loginForm.getPassword()));
-      UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-      addAuthCookie(response, jwtService.generateToken(userDetails));
-      return "redirect:/dashboard";
+      return authenticateAndLogin(loginForm, response);
     } catch (BadCredentialsException ex) {
       model.addAttribute("pageTitle", "登录");
       model.addAttribute("authError", "用户名或密码错误");
@@ -104,13 +98,10 @@ public class AuthController {
 
     try {
       authService.register(registrationForm);
-      Authentication authentication =
-          authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(
-                  registrationForm.getUsername().trim(), registrationForm.getPassword()));
-      UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-      addAuthCookie(response, jwtService.generateToken(userDetails));
-      return "redirect:/dashboard";
+      LoginForm loginForm = new LoginForm();
+      loginForm.setUsername(registrationForm.getUsername());
+      loginForm.setPassword(registrationForm.getPassword());
+      return authenticateAndLogin(loginForm, response);
     } catch (IllegalArgumentException ex) {
       model.addAttribute("pageTitle", "注册");
       model.addAttribute("registerError", ex.getMessage());
@@ -142,6 +133,16 @@ public class AuthController {
             .maxAge(60L * 60L * 24L)
             .build();
     response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+  }
+
+  private String authenticateAndLogin(LoginForm loginForm, HttpServletResponse response) {
+    Authentication authentication =
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                loginForm.getUsername().trim(), loginForm.getPassword()));
+    UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+    addAuthCookie(response, jwtService.generateToken(userDetails));
+    return "redirect:/dashboard";
   }
 
   private boolean isLoggedIn(Authentication authentication) {
