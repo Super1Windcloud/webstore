@@ -74,7 +74,8 @@ public class RuntimeComposeService {
   }
 
   private ProcessResult runCompose(String slug, RuntimeCommandRequest request, List<String> args) {
-    Path commonComposeFile = Path.of(runtimeAgentProperties.localAppsPath()).getParent().resolve("docker-compose.common.yml");
+    Path commonComposeFile =
+        Path.of(runtimeAgentProperties.localAppsPath(), "docker-compose.common.yml");
     Path composeFile = Path.of(runtimeAgentProperties.localAppsPath(), slug, "docker-compose.yml");
     if (!Files.exists(composeFile)) {
       throw new RuntimeOperationException("未找到应用的 docker-compose.yml: " + composeFile);
