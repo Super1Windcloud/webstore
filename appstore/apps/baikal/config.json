@@ -1,0 +1,21 @@
+{
+  "$schema": "../app-info-schema.json",
+  "name": "Baïkal",
+  "available": true,
+  "exposable": true,
+  "dynamic_config": true,
+  "port": 6556,
+  "id": "baikal",
+  "tipi_version": 8,
+  "version": "0.11.1",
+  "categories": ["data", "utilities"],
+  "description": "Baïkal is a Calendar + Contacts server",
+  "short_desc": "Calendar + Contacts server",
+  "author": "aalmenar",
+  "source": "https://github.com/aalmenar/baikal-docker",
+  "form_fields": [],
+  "supported_architectures": ["arm64", "amd64"],
+  "created_at": 1691943801422,
+  "updated_at": 1771509200000,
+  "min_tipi_version": "4.5.0"
+}

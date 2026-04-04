@@ -1,0 +1,50 @@
+{
+  "name": "runtipi-appstore",
+  "version": "1.0.0",
+  "description": "",
+  "type": "module",
+  "scripts": {
+    "commit": "git-cz",
+    "lint": "biome check",
+    "lint:ci": "biome ci --changed --error-on-warnings --no-errors-on-unmatched",
+    "test:codemod:native-docker": "node --test codemods/native-docker/tests/convert-native-docker.test.mjs",
+    "test": "bun test && bun run scripts/validate-json.js",
+    "prepare": "lefthook install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/meienberger/runtipi-appstore.git"
+  },
+  "author": "",
+  "license": "GNU General Public License v3.0",
+  "bugs": {
+    "url": "https://github.com/meienberger/runtipi-appstore/issues"
+  },
+  "homepage": "https://github.com/meienberger/runtipi-appstore#readme",
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.10",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
+    "@commitlint/cz-commitlint": "^20.5.1",
+    "@types/jest": "^30.0.0",
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^25.5.0",
+    "@types/semver": "^7.7.1",
+    "commitizen": "^4.3.1",
+    "jest": "^30.3.0",
+    "js-yaml": "^4.1.1",
+    "lefthook": "^2.1.4",
+    "semver": "^7.7.4",
+    "ts-jest": "^29.4.9",
+    "typescript": "^6.0.2"
+  },
+  "config": {
+    "commitizen": {
+      "path": "@commitlint/cz-commitlint"
+    }
+  },
+  "dependencies": {
+    "@runtipi/common": "^1.1.3",
+    "ajv": "^8.18.0"
+  }
+}

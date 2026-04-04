@@ -1,0 +1,49 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "automerge": false,
+  "prHourlyLimit": 20,
+  "extends": ["config:recommended"],
+  "rebaseWhen": "conflicted",
+  "enabledManagers": ["custom.regex"],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^.*docker-compose\\.json$/"],
+      "matchStrings": ["\"image\": \"(?<depName>.*?):(?<currentValue>.*?)\","],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "managerFilePatterns": ["/^.*docker-compose\\.ya?ml$/"],
+      "matchStrings": ["image:\\s+[\"']?(?<depName>.*?):(?<currentValue>[^\"'\\s]+)[\"']?"],
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["major"],
+      "addLabels": ["major"]
+    },
+    {
+      "matchUpdateTypes": ["minor", "patch"],
+      "addLabels": ["automerge"]
+    },
+    {
+      "matchPackageNames": ["mariadb", "mysql", "mongodb", "postgres", "redis"],
+      "enabled": false
+    },
+    {
+      "matchPackageNames": ["ghcr.io/diced/zipline"],
+      "enabled": false
+    }
+  ],
+  "postUpgradeTasks": {
+    "commands": [
+      "bun ./scripts/update-config.ts {{packageFile}} {{newVersion}} {{packageName}}",
+      "bunx @biomejs/biome check --write",
+      "bun install && bun run test"
+    ],
+    "fileFilters": ["**/*"],
+    "executionMode": "update"
+  }
+}

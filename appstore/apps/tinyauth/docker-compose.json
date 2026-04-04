@@ -1,0 +1,52 @@
+{
+  "services": [
+    {
+      "name": "tinyauth",
+      "image": "ghcr.io/steveiliop56/tinyauth:v5.0.6",
+      "internalPort": 3000,
+      "isMain": true,
+      "environment": [
+        {
+          "key": "TINYAUTH_UI_TITLE",
+          "value": "${TINYAUTH_APP_TITLE}"
+        },
+        {
+          "key": "TINYAUTH_APPURL",
+          "value": "${TINYAUTH_APP_URL}"
+        },
+        {
+          "key": "TINYAUTH_AUTH_USERS",
+          "value": "${TINYAUTH_USERS}"
+        },
+        {
+          "key": "TINYAUTH_OAUTH_PROVIDERS_GITHUB_CLIENTID",
+          "value": "${TINYAUTH_GITHUB_CLIENT_ID}"
+        },
+        {
+          "key": "TINYAUTH_OAUTH_PROVIDERS_GITHUB_CLIENTSECRET",
+          "value": "${TINYAUTH_GITHUB_CLIENT_SECRET}"
+        },
+        {
+          "key": "TINYAUTH_OAUTH_PROVIDERS_GOOGLE_CLIENTID",
+          "value": "${TINYAUTH_GOOGLE_CLIENT_ID}"
+        },
+        {
+          "key": "TINYAUTH_OAUTH_PROVIDERS_GOOGLE_CLIENTSECRET",
+          "value": "${TINYAUTH_GOOGLE_CLIENT_SECRET}"
+        },
+        {
+          "key": "TINYAUTH_OAUTH_WHITELIST",
+          "value": "${TINYAUTH_OAUTH_WHITELIST}"
+        }
+      ],
+      "volumes": [
+        {
+          "hostPath": "${APP_DATA_DIR}/data",
+          "containerPath": "/data"
+        }
+      ]
+    }
+  ],
+  "schemaVersion": 2,
+  "$schema": "https://schemas.runtipi.io/v2/dynamic-compose.json"
+}
