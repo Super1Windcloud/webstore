@@ -1,5 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const root = document.documentElement;
+  const loadingOverlay = createLoadingOverlay();
   const toggleTheme = () => {
     const current = root.getAttribute("data-theme") || "dark";
     const next = current === "dark" ? "light" : "dark";
@@ -58,4 +59,51 @@ document.addEventListener("DOMContentLoaded", () => {
     window.setTimeout(dismiss, 2800);
     toast.querySelector("[data-toast-close]")?.addEventListener("click", dismiss);
   });
+
+  document.querySelectorAll("form[method='post']").forEach((form) => {
+    if (!isRuntimeActionForm(form)) {
+      return;
+    }
+
+    form.addEventListener("submit", (event) => {
+      if (form.dataset.submitting === "true") {
+        event.preventDefault();
+        return;
+      }
+
+      form.dataset.submitting = "true";
+      document.body.classList.add("is-loading");
+      loadingOverlay.hidden = false;
+
+      form.querySelectorAll("button, input[type='submit']").forEach((control) => {
+        control.disabled = true;
+      });
+    });
+  });
 });
+
+function isRuntimeActionForm(form) {
+  const action = form.getAttribute("action") || "";
+  return (
+    /\/app-store\/[^/]+\/install$/.test(action) ||
+    /\/my-apps\/[^/]+\/start$/.test(action) ||
+    /\/my-apps\/[^/]+\/stop$/.test(action) ||
+    /\/my-apps\/[^/]+\/uninstall$/.test(action) ||
+    /\/my-apps\/start-all$/.test(action) ||
+    /\/my-apps\/stop-all$/.test(action)
+  );
+}
+
+function createLoadingOverlay() {
+  const overlay = document.createElement("div");
+  overlay.className = "loading-overlay";
+  overlay.hidden = true;
+  overlay.innerHTML = `
+    <div class="loading-dialog" role="status" aria-live="polite" aria-label="页面正在加载">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">正在处理中，请稍候...</div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  return overlay;
+}
